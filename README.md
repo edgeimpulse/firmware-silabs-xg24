@@ -1,0 +1,1 @@
+# firmware-silabs-xg24
