@@ -1,0 +1,289 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: firmware-xg24
+label: firmware-xg24
+description: |
+  Firmware for integration with Edge Impulse Studio. Provides ingestion and
+  inference on inertial sensor and microphone.
+category: Third Party|Edge Impulse
+package: platform
+quality: production
+source:
+- {path: firmware-sdk/at-server/ei_at_parser.cpp, folder: firmware-sdk/at-server}
+- {path: firmware-sdk/at-server/ei_at_server.cpp, folder: firmware-sdk/at-server}
+- {path: firmware-sdk/at-server/ei_at_server_singleton.cpp, folder: firmware-sdk/at-server}
+- {path: firmware-sdk/jpeg/JPEGENC.cpp, folder: firmware-sdk/jpeg}
+- {path: firmware-sdk/at_base64_lib.cpp, folder: firmware-sdk}
+- {path: firmware-sdk/ei_device_lib.cpp, folder: firmware-sdk}
+- {path: firmware-sdk/ei_image_lib.cpp, folder: firmware-sdk}
+- {path: firmware-sdk/ei_fusion.cpp, folder: firmware-sdk}
+- {path: firmware-sdk/sensor_aq.cpp, folder: firmware-sdk}
+- {path: src/ei_at_handlers.cpp, folder: src}
+- {path: src/ei_device_xg24.cpp, folder: src}
+- {path: src/ei_sampler.cpp, folder: src}
+- {path: src/flash_memory.cpp, folder: src}
+- {path: src/main.cpp, folder: src}
+- {path: src/drivers/ArduCAM_OV2640/ArduCAM.cpp, folder: src/drivers/ArduCAM_OV2640}
+- {path: src/drivers/MX25R3235/mx25flash_spi.c, folder: src/drivers/MX25R3235}
+- {path: src/inference/ei_run_accelerometer_impulse.cpp, folder: src/inference}
+- {path: src/inference/ei_run_audio_impulse.cpp, folder: src/inference}
+- {path: src/inference/ei_run_camera_impulse.cpp, folder: src/inference}
+- {path: src/inference/ei_run_fusion_impulse.cpp, folder: src/inference}
+- {path: src/libs/jpegdec/jpegdec.cpp, folder: src/libs/jpegdec}
+- {path: src/libs/jpegdec/picojpeg.c, folder: src/libs/jpegdec}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/aesni.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/arc4.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/aria.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/asn1parse.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/asn1write.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/base64.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/bignum.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/blowfish.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/camellia.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ccm.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/certs.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/chacha20.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/chachapoly.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/cmac.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ctr_drbg.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/debug.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/des.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/dhm.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ecdh.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ecdsa.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ecjpake.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ecp.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ecp_curves.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/entropy.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/error.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/gcm.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/havege.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/hkdf.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/hmac_drbg.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/md2.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/md4.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/md5.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/md.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/md_wrap.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/memory_buffer_alloc.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/nist_kw.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/oid.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/padlock.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pem.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pk.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pkcs11.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pkcs12.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pkcs5.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pkparse.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pk_wrap.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/pkwrite.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/platform.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/platform_util.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/poly1305.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ripemd160.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/rsa.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/rsa_internal.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/sha1.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/sha256.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/sha512.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_cache.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_ciphersuites.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_cli.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_cookie.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_srv.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_ticket.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/ssl_tls.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/threading.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/version.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src/version_features.c, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls/src}
+- {path: src/libs/QCBOR/src/ieee754.c, folder: src/libs/QCBOR/src}
+- {path: src/libs/QCBOR/src/ieee754.h, folder: src/libs/QCBOR/src}
+- {path: src/libs/QCBOR/src/qcbor_decode.c, folder: src/libs/QCBOR/src}
+- {path: src/libs/QCBOR/src/qcbor_encode.c, folder: src/libs/QCBOR/src}
+- {path: src/libs/QCBOR/src/UsefulBuf.c, folder: src/libs/QCBOR/src}
+- {path: src/libs/sensor_aq_mbedtls/sensor_aq_mbedtls_hs256.cpp, folder: src/libs/sensor_aq_mbedtls}
+- {path: src/sensors/ei_camera_arducam.cpp, folder: src/sensors}
+- {path: src/sensors/ei_environment_sensor.cpp, folder: src/sensors}
+- {path: src/sensors/ei_hall_sensor.cpp, folder: src/sensors}
+- {path: src/sensors/ei_inertial_sensor.cpp, folder: src/sensors}
+- {path: src/sensors/ei_interaction_sensor.cpp, folder: src/sensors}
+- {path: src/sensors/ei_microphone.cpp, folder: src/sensors}
+include:
+- path: ''
+  file_list:
+  - {path: firmware-sdk/at-server/ei_at_command_set.h, folder: firmware-sdk/at-server}
+  - {path: firmware-sdk/at-server/ei_at_history.h, folder: firmware-sdk/at-server}
+  - {path: firmware-sdk/at-server/ei_at_parser.h, folder: firmware-sdk/at-server}
+  - {path: firmware-sdk/at-server/ei_at_server.h, folder: firmware-sdk/at-server}
+  - {path: firmware-sdk/at-server/ei_line_buffer.h, folder: firmware-sdk/at-server}
+  - {path: firmware-sdk/jpeg/encode_as_jpg.h, folder: firmware-sdk/jpeg}
+  - {path: firmware-sdk/jpeg/jpeg.h, folder: firmware-sdk/jpeg}
+  - {path: firmware-sdk/jpeg/JPEGENC.h, folder: firmware-sdk/jpeg}
+  - {path: firmware-sdk/at_base64_lib.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_camera_interface.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_config_types.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_device_info_lib.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_device_interface.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_device_lib.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_device_memory.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_fusion.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_image_lib.h, folder: firmware-sdk}
+  - {path: firmware-sdk/ei_image_nn.h, folder: firmware-sdk}
+  - {path: firmware-sdk/sensor_aq.h, folder: firmware-sdk}
+- path: src
+  file_list:
+  - {path: ei_at_handlers.h, folder: src}
+  - {path: ei_device_xg24.h, folder: src}
+  - {path: ei_fusion_sensors_config.h, folder: src}
+  - {path: ei_sampler.h, folder: src}
+  - {path: flash_memory.h, folder: src}
+  - {path: inference/ei_run_impulse.h, folder: src/inference}
+  - {path: sensors/ei_camera_arducam.h, folder: src/sensors}
+  - {path: sensors/ei_inertial_sensor.h, folder: src/sensors}
+  - {path: sensors/ei_interaction_sensor.h, folder: src/sensors}
+  - {path: sensors/ei_environment_sensor.h, folder: src/sensors}
+  - {path: sensors/ei_hall_sensor.h, folder: src/sensors}
+  - {path: sensors/ei_microphone.h, folder: src/sensors}
+- path: src/drivers
+  file_list:
+  - {path: ArduCAM_OV2640/ArduCAM.h, folder: src/drivers/ArduCAM_OV2640}
+  - {path: ArduCAM_OV2640/ov2640_regs.h, folder: src/drivers/ArduCAM_OV2640}
+  - {path: MX25R3235/mx25flash_spi.h, folder: src/drivers/MX25R3235}
+- path: src/libs
+  file_list:
+  - {path: jpegdec/jpegdec.h, folder: src/libs/jpegdec}
+  - {path: jpegdec/picojpeg.h, folder: src/libs/jpegdec}
+  - {path: mbedtls_hmac_sha256_sw/ei_mbedtls_md.h, folder: src/libs/mbedtls_hmac_sha256_sw}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/aes.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/aesni.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/arc4.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/aria.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/asn1.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/asn1write.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/base64.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/bignum.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/blowfish.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/bn_mul.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/camellia.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ccm.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/certs.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/chacha20.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/chachapoly.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/check_config.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/cipher.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/cipher_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/cmac.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/compat-1.3.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/config.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ctr_drbg.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/debug.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/des.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/dhm.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ecdh.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ecdsa.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ecjpake.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ecp.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ecp_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/entropy.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/entropy_poll.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/error.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/gcm.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/havege.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/hkdf.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/hmac_drbg.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/md2.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/md4.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/md5.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/md.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/md_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/memory_buffer_alloc.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/net.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/net_sockets.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/nist_kw.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/oid.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/padlock.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pem.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pkcs11.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pkcs12.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pkcs5.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pk.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/pk_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/platform.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/platform_time.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/platform_util.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/poly1305.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ripemd160.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/rsa.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/rsa_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/sha1.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/sha256.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/sha512.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl_cache.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl_ciphersuites.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl_cookie.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl_internal.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/ssl_ticket.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/threading.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/timing.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/version.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/x509_crl.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/x509_crt.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/x509_csr.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/x509.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: mbedtls_hmac_sha256_sw/mbedtls/xtea.h, folder: src/libs/mbedtls_hmac_sha256_sw/mbedtls}
+  - {path: QCBOR/inc/qcbor.h, folder: src/libs/QCBOR/inc}
+  - {path: QCBOR/inc/UsefulBuf.h, folder: src/libs/QCBOR/inc}
+  - {path: sensor_aq_mbedtls/sensor_aq_mbedtls_hs256.h, folder: src/libs/sensor_aq_mbedtls}
+- {path: src/libs/QCBOR/inc}
+- {path: src/libs/mbedtls_hmac_sha256_sw}
+sdk: {id: gecko_sdk, version: 4.0.2}
+toolchain_settings:
+- {value: -Wno-unused-parameter, option: gcc_compiler_option}
+- {value: -Werror=return-type, option: gcc_compiler_option}
+component:
+- {id: stdio}
+- {id: bmp3xx_driver}
+- {id: brd2601b}
+- {id: custom_edge_impulse_library}
+- {id: sl_system}
+- {id: si7210_driver}
+- {id: si70xx_driver}
+- {id: iostream_recommended_stream}
+- instance: [cam, sensor]
+  id: i2cspm
+- instance: [led0, led1, led2]
+  id: simple_led
+- {id: printf}
+- {id: component_catalog}
+- {id: mic_driver}
+- {id: device_init}
+- {id: device_init_hfrco}
+- {id: imu_driver}
+- {id: veml6035_driver}
+- {id: sleeptimer}
+define:
+- {name: DEBUG_EFM}
+- {name: EI_SENSOR_AQ_STREAM, value: FILE}
+config_file:
+- override:
+    component: i2cspm
+    file_id: i2cspm_config
+    instance: cam
+  path: config/sl_i2cspm_cam_config.h
+requires:
+- {name: toolchain_gcc}
+- {name: cpp_support}
+- {name: emlib_system}
+configuration:
+- {name: SL_DEVICE_INIT_HFRCO_BAND, value: cmuHFRCODPLLFreq_80M0Hz}
+- condition: [iostream_usart]
+  name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
+  value: '1'
+- {name: SL_BOARD_ENABLE_SENSOR_IMU, value: '1'}
+- {name: SL_BOARD_ENABLE_SENSOR_MICROPHONE, value: '1'}
+- {name: SL_BOARD_DISABLE_MEMORY_SPI, value: '0'}
+- {name: SL_HEAP_SIZE, value: '0x10a00'}
+ui_hints: {}
+component_path:
+- {path: model}
+
