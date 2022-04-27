@@ -30,6 +30,7 @@
 #include "sl_simple_led.h"
 #include "sl_simple_led_instances.h"
 #include "sl_iostream_eusart_vcom_config.h"
+#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 extern "C" {
 #include "em_eusart.h"
 };
@@ -38,9 +39,9 @@ extern "C" {
 #include "sensors/ei_inertial_sensor.h"
 #include "sensors/ei_camera_arducam.h"
 
-#define LED_RED     sl_led_led0
-#define LED_GREEN   sl_led_led1
-#define LED_BLUE    sl_led_led2
+static const sl_led_t *led_red = &sl_led_led0;
+static const sl_led_t *led_green = &sl_led_led1;
+static const sl_led_t *led_blue = &sl_led_led2;
 
 using namespace std;
 
@@ -58,19 +59,17 @@ static void on_led_timer(sl_sleeptimer_timer_handle_t *handle, void *data)
     switch(dev->get_state())
     {
         case eiStateErasingFlash:
-            sl_led_toggle(&LED_BLUE);
+            dev->toggle_led(led_red);
             break;
         case eiStateSampling:
-            sl_led_toggle(&LED_GREEN);
+            dev->toggle_led(led_blue);
             break;
         case eiStateUploading:
-            if(dev->is_camera_present() == false) {
-                sl_led_toggle(&LED_RED);
-            }
+            dev->toggle_led(led_green);
             break;
         case eiStateFinished:
             if(animation == 0) {
-                animation = 5;
+                animation = 10;
             }
             break;
         default:
@@ -82,40 +81,52 @@ static void on_led_timer(sl_sleeptimer_timer_handle_t *handle, void *data)
     }
 
     switch(animation) {
+        case 10:
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 0);
+            break;
+        case 9:
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 1);
+            break;
+        case 8:
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 1);
+            dev->set_led(led_blue, 0);
+            break;
+        case 7:
+            dev->set_led(led_red, 1);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 0);
+            break;
+        case 6:
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 1);
+            break;
         case 5:
-            if(dev->is_camera_present() == false) {
-                sl_led_turn_off(&LED_RED);
-            }
-            sl_led_turn_off(&LED_GREEN);
-            sl_led_turn_off(&LED_BLUE);
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 1);
+            dev->set_led(led_blue, 0);
             break;
         case 4:
-            if(dev->is_camera_present() == false) {
-                sl_led_turn_on(&LED_RED);
-            }
-            sl_led_turn_off(&LED_GREEN);
-            sl_led_turn_off(&LED_BLUE);
+            dev->set_led(led_red, 1);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 0);
             break;
         case 3:
-            if(dev->is_camera_present() == false) {
-                sl_led_turn_off(&LED_RED);
-            }
-            sl_led_turn_on(&LED_GREEN);
-            sl_led_turn_off(&LED_BLUE);
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 0);
+            dev->set_led(led_blue, 1);
             break;
         case 2:
-            if(dev->is_camera_present() == false) {
-                sl_led_turn_off(&LED_RED);
-            }
-            sl_led_turn_off(&LED_GREEN);
-            sl_led_turn_on(&LED_BLUE);
+            dev->set_led(led_red, 0);
+            dev->set_led(led_green, 1);
+            dev->set_led(led_blue, 0);
             break;
         case 1:
-            if(dev->is_camera_present() == false) {
-                sl_led_turn_off(&LED_RED);
-            }
-            sl_led_turn_off(&LED_GREEN);
-            sl_led_turn_off(&LED_BLUE);
             dev->set_state(eiStateIdle);
             break;
     }
@@ -134,6 +145,9 @@ EiDeviceXG24::EiDeviceXG24(EiDeviceMemory* mem)
 
     cam = static_cast<EiCameraArduCam*>(EiCameraArduCam::get_camera());
     camera_present = cam->is_camera_present();
+    if(camera_present == true) {
+        led_red = nullptr;
+    }
 
     standalone_sensor_list[0].name = "Accelerometer";
     standalone_sensor_list[0].frequencies[0] = 20.0f;
@@ -181,6 +195,13 @@ void EiDeviceXG24::init_device_id(void)
     mac_address = string(temp);
 }
 
+/**
+ * @brief get_device is a static method of EiDeviceInfo class
+ * It is used to implement singleton paradigm, so we are returning
+ * here pointer always to the same object (dev)
+ * 
+ * @return EiDeviceInfo* 
+ */
 EiDeviceInfo* EiDeviceInfo::get_device(void)
 {
     static EiFlashMemory memory(sizeof(EiConfig));
@@ -209,8 +230,6 @@ bool EiDeviceXG24::start_sample_thread(void (*sample_read_cb)(void), float sampl
                                           0,
                                           SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
 
-    this->set_state(eiStateSampling);
-
     return ret == SL_STATUS_OK;
 }
 
@@ -220,14 +239,16 @@ bool EiDeviceXG24::stop_sample_thread(void)
 
     ret = sl_sleeptimer_stop_timer(&this->sample_timer);
 
-    this->set_state(eiStateIdle);
-
     return ret == SL_STATUS_OK;
 }
 
 void EiDeviceXG24::set_state(EiState state)
 {
     this->state = state;
+
+    set_led(led_red, 0);
+    set_led(led_green, 0);
+    set_led(led_blue, 0);
 
     switch(state) {
         case eiStateErasingFlash:
@@ -244,12 +265,33 @@ void EiDeviceXG24::set_state(EiState state)
         case eiStateIdle:
         default:
             sl_sleeptimer_stop_timer(&this->led_timer);
-            if(camera_present == false) {
-                sl_led_turn_off(&LED_RED);
-            }
-            sl_led_turn_off(&LED_GREEN);
-            sl_led_turn_off(&LED_BLUE);
+            set_led(led_red, 0);
+            set_led(led_green, 0);
+            set_led(led_blue, 0);
     }
+}
+
+void EiDeviceXG24::set_led(const sl_led_t *led_handle, uint8_t state)
+{
+    if(led_handle == nullptr) {
+        return;
+    }
+
+    if(state == 0) {
+        sl_led_turn_off(led_handle);
+    }
+    else {
+        sl_led_turn_on(led_handle);
+    }
+}
+
+void EiDeviceXG24::toggle_led(const sl_led_t *led_handle)
+{
+    if(led_handle == nullptr) {
+        return;
+    }
+
+    sl_led_toggle(led_handle);
 }
 
 EiState EiDeviceXG24::get_state(void)
@@ -289,16 +331,6 @@ EiSnapshotProperties EiDeviceXG24::get_snapshot_list(void)
     }
 
     return props;
-}
-
-void EiDeviceXG24::set_default_data_output_baudrate(void)
-{
-    EUSART_BaudrateSet(SL_IOSTREAM_EUSART_VCOM_PERIPHERAL, 0, 115200);
-}
-
-void EiDeviceXG24::set_max_data_output_baudrate(void)
-{
-    EUSART_BaudrateSet(SL_IOSTREAM_EUSART_VCOM_PERIPHERAL, 0, this->get_data_output_baudrate());
 }
 
 uint32_t EiDeviceXG24::get_data_output_baudrate(void)

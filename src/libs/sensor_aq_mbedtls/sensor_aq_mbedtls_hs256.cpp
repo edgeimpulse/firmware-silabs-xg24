@@ -32,10 +32,14 @@
 #include "mbedtls/md.h"
 #include "mbedtls/sha256.h"
 //#include "mbed_trace.h"
-#include "ei_mbedtls_md.h"
 
 //#ifdef MBEDTLS_MD_C
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
+
+#define ei_mbedtls_md_setup       mbedtls_md_setup
+#define ei_mbedtls_md_hmac_starts mbedtls_md_hmac_starts
+#define ei_mbedtls_md_hmac_finish mbedtls_md_hmac_finish
+#define ei_mbedtls_md_hmac_update mbedtls_md_hmac_update
 
 typedef struct {
     mbedtls_md_context_t md_ctx;

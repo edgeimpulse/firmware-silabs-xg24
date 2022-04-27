@@ -48,7 +48,6 @@ int encode_as_jpg(uint8_t *framebuffer, size_t framebuffer_size, int width, int 
 }
 
 extern void ei_putc(char data);
-
 int32_t jpeg_write_callback (JPEGFILE *pFile, uint8_t *pBuf, int32_t iLen) {
     base64_encode((const char *)pBuf, iLen, ei_putc);
     return 0;
@@ -91,12 +90,12 @@ static int encode_bw_signal_as_jpg_common(signal_t *signal, int width, int heigh
     int last_offset = 0;
     int max_offset_diff = 0;
 
-    encode_buffer = (float*)malloc(buf_len * 4);
+    encode_buffer = (float*)ei_malloc(buf_len * 4);
     if (!encode_buffer) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;
     }
-    encode_buffer_u8 = (uint8_t*)malloc(buf_len * bytePp);
+    encode_buffer_u8 = (uint8_t*)ei_malloc(buf_len * bytePp);
     if (!encode_buffer_u8) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;
@@ -187,13 +186,13 @@ static int encode_rgb888_signal_as_jpg_common(signal_t *signal, int width, int h
     int max_offset_diff = 0;
 
     // encode_buffer in 4 BPP (float32)
-    encode_buffer = (float*)malloc(buf_len * 4);
+    encode_buffer = (float*)ei_malloc(buf_len * 4);
     if (!encode_buffer) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;
     }
     //encode_buffer_u8 in 3 BPP
-    encode_buffer_u8 = (uint8_t*)malloc(buf_len * bytePp);
+    encode_buffer_u8 = (uint8_t*)ei_malloc(buf_len * bytePp);
     if (!encode_buffer_u8) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;
@@ -293,13 +292,13 @@ static int encode_rgb565_signal_as_jpg_common(signal_t *signal, int width, int h
     int max_offset_diff = 0;
 
     // encode_buffer in 4 BPP (float32)
-    encode_buffer = (float*)malloc(buf_len * 4);
+    encode_buffer = (float*)ei_malloc(buf_len * 4);
     if (!encode_buffer) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;
     }
     //encode_buffer_u8 in 2 BPP
-    encode_buffer_u8 = (uint8_t*)malloc(buf_len * bytePp);
+    encode_buffer_u8 = (uint8_t*)ei_malloc(buf_len * bytePp);
     if (!encode_buffer_u8) {
         rc = JPEG_MEM_ERROR;
         goto cleanup;

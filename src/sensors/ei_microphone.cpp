@@ -25,6 +25,7 @@
 #include "firmware-sdk/sensor_aq.h"
 #include "sensor_aq_mbedtls/sensor_aq_mbedtls_hs256.h"
 #include "edge-impulse-sdk/CMSIS/DSP/Include/dsp/support_functions.h"
+#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 #include "sl_mic.h"
 #include "sl_status.h"
 
@@ -80,7 +81,7 @@ static int insert_ref(char *buffer, int hdrLength)
     int padding = EXTRA_BYTES(hdrLength);
 
     buffer[addLength++] = 0x60 + 14 + padding;
-    for(int i = 0; i < strlen(ref); i++) {
+    for(unsigned int i = 0; i < strlen(ref); i++) {
         buffer[addLength++] = *(ref + i);
     }
     for(int i = 0; i < padding; i++) {
@@ -109,7 +110,7 @@ static bool create_header(sensor_aq_payload_info *payload)
     // then we're gonna find the last byte that is not 0x00 in the CBOR buffer.
     // That should give us the whole header
     size_t end_of_header_ix = 0;
-    for (size_t ix = ei_mic_ctx.cbor_buffer.len - 1; ix >= 0; ix--) {
+    for (size_t ix = ei_mic_ctx.cbor_buffer.len - 1; ix != 0; ix--) {
         if (((uint8_t *)ei_mic_ctx.cbor_buffer.ptr)[ix] != 0x0) {
             end_of_header_ix = ix;
             break;
@@ -132,8 +133,7 @@ static bool create_header(sensor_aq_payload_info *payload)
 
     // Write to blockdevice
     ret = mem->write_sample_data((uint8_t*)ei_mic_ctx.cbor_buffer.ptr, 0, end_of_header_ix);
-
-    if (ret != end_of_header_ix) {
+    if ((size_t)ret != end_of_header_ix) {
         ei_printf("Failed to write to header blockdevice (%d)\n", ret);
         return false;
     }
@@ -149,12 +149,12 @@ static void ingestion_samples_callback(const int16_t *buffer, uint32_t sample_co
     EiDeviceMemory* mem = dev->get_memory();
 
     if(sample_count > MIC_SAMPLE_SIZE) {
-        ei_printf("ERR: too much data from microphone: %d Discarding...\n", sample_count);
+        ei_printf("ERR: too much data from microphone: %lu Discarding...\n", sample_count);
         return;
     }
 
     // apply gain to received data
-    for(int i = 0; i < sample_count; i++) {
+    for(uint32_t i = 0; i < sample_count; i++) {
         sample_buffer_processed[i] = buffer[i] * 4;
     }
 
@@ -206,6 +206,8 @@ bool ei_microphone_sample_start(void)
         return false;
     }
 
+    dev->set_state(eiStateErasingFlash);
+
     // Minimum delay of 2000 ms for daemon
     uint32_t delay_time_ms = ((required_samples_size / mem->block_size) + 1) * mem->block_erase_time;
     ei_printf("Starting in %lu ms... (or until all flash was erased)\n", delay_time_ms < 2000 ? 2000 : delay_time_ms);
@@ -222,7 +224,7 @@ bool ei_microphone_sample_start(void)
     // enable mic driver
     mic_status = sl_mic_init((uint32_t)(1000.0f / dev->get_sample_interval_ms()), 1);
     if(mic_status != SL_STATUS_OK) {
-        ei_printf("Error microphone init: %04x\n", mic_status);
+        ei_printf("Error microphone init: %04lx\n", mic_status);
         return false;
     }
 
@@ -246,13 +248,15 @@ bool ei_microphone_sample_start(void)
 
     mic_status = sl_mic_start_streaming(sample_buffer, MIC_SAMPLE_SIZE, (sl_mic_buffer_ready_callback_t)ingestion_samples_callback);
     if(mic_status != SL_STATUS_OK) {
-        ei_printf("Error microphone sampling: %04x\n", mic_status);
+        ei_printf("Error microphone sampling: %04lx\n", mic_status);
         ei_free(sample_buffer);
         ei_free(sample_buffer_processed);
         return false;
     }
 
     ei_printf("Sampling...\n");
+
+    dev->set_state(eiStateSampling);
 
     while (current_sample < required_samples_size) {
         ei_sleep(10);
@@ -277,8 +281,8 @@ bool ei_microphone_sample_start(void)
     }
 
     ret = mem->read_sample_data(page_buffer, 0, mem->block_size);
-    if (ret != mem->block_size) {
-        ei_printf("Failed to read first page (read %d, requersted %d)\n", ret, mem->block_size);
+    if ((uint32_t)ret != mem->block_size) {
+        ei_printf("Failed to read first page (read %d, requersted %lu)\n", ret, mem->block_size);
         ei_free(page_buffer);
         return false;
     }
@@ -303,8 +307,8 @@ bool ei_microphone_sample_start(void)
     }
 
     ret = mem->erase_sample_data(0, mem->block_size);
-    if (ret != mem->block_size) {
-        ei_printf("Failed to erase first page (read %d, requested %d)\n", ret, mem->block_size);
+    if ((uint32_t)ret != mem->block_size) {
+        ei_printf("Failed to erase first page (read %d, requested %lu)\n", ret, mem->block_size);
         ei_free(page_buffer);
         return false;
     }
@@ -312,14 +316,14 @@ bool ei_microphone_sample_start(void)
     ret = mem->write_sample_data(page_buffer, 0, mem->block_size);
     ei_free(page_buffer);
 
-    if (ret != mem->block_size) {
-        ei_printf("Failed to write first page with updated hash (read %d, requested %d)\n", ret, mem->block_size);
+    if ((uint32_t)ret != mem->block_size) {
+        ei_printf("Failed to write first page with updated hash (read %d, requested %lu)\n", ret, mem->block_size);
         return false;
     }
 
-    ei_printf("Done sampling, total bytes collected: %u\n", required_samples_size);
+    ei_printf("Done sampling, total bytes collected: %lu\n", required_samples_size);
     ei_printf("[1/1] Uploading file to Edge Impulse...\n");
-    ei_printf("Not uploading file, not connected to WiFi. Used buffer, from=%lu, to=%lu.\n", 0, required_samples_size + headerOffset);
+    ei_printf("Not uploading file, not connected to WiFi. Used buffer, from=0, to=%lu.\n", required_samples_size + headerOffset);
     ei_printf("OK\n");
 
     return true;

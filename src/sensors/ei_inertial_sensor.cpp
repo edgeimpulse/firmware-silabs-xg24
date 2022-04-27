@@ -36,7 +36,6 @@
 sampler_callback inertial_cb_sampler;
 static float imu_data[INERTIAL_AXIS_SAMPLED];
 static sl_sleeptimer_timer_handle_t sample_timer;
-static uint32_t requested_samples_num;
 
 bool ei_inertial_init(void)
 {
@@ -44,7 +43,7 @@ bool ei_inertial_init(void)
 
     ret = sl_imu_init();
     if(ret != SL_STATUS_OK) {
-        ei_printf("ERR: IMU init failed (0x%04x)!\n", ret);
+        ei_printf("ERR: IMU init failed (0x%04lx)!\n", ret);
         return false;
     }
 
@@ -78,25 +77,16 @@ static void sample_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *da
     if(inertial_cb_sampler((const void *)&imu_data[0], SIZEOF_ACCEL_AXIS_SAMPLED) == true) {
         sl_sleeptimer_stop_timer(&sample_timer);
     }
-
-    if(--requested_samples_num == 0) {
-        sl_sleeptimer_stop_timer(&sample_timer);
-    }
 }
 
 bool ei_accel_sample_start(sampler_callback callsampler, float sample_interval_ms)
 {
-    EiDeviceInfo *dev = EiDeviceInfo::get_device();
+    EiDeviceInfo* dev = EiDeviceInfo::get_device();
     sl_status_t ret;
-
-    // to avoid getting additional sample before stopping timer, calculate number of samples
-    // to collect and stop sampling timer if all of them were captured
-    requested_samples_num = dev->get_sample_length_ms() / dev->get_sample_interval_ms();
-
     inertial_cb_sampler = callsampler;
 
     ret = sl_sleeptimer_start_periodic_timer_ms(&sample_timer,
-                                          sample_interval_ms,
+                                          dev->get_sample_interval_ms(),
                                           sample_timer_callback,
                                           0,
                                           0,

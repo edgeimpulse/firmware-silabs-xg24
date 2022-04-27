@@ -21,12 +21,10 @@
  */
 
 #include <cstdio>
+#include "ble.h"
 #include "sl_stdio.h"
-#include "sl_iostream.h"
 #include "sl_component_catalog.h"
 #include "sl_system_init.h"
-#include "sl_udelay.h"
-#include "sl_simple_led_instances.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
@@ -39,16 +37,11 @@
 #include "ei_device_xg24.h"
 #include "inference/ei_run_impulse.h"
 #include "sensors/ei_inertial_sensor.h"
-#include "sensors/ei_interaction_sensor.h"
+#include "sensors/ei_ambient_sensor.h"
 #include "sensors/ei_environment_sensor.h"
 #include "sensors/ei_hall_sensor.h"
 #include "sensors/ei_camera_arducam.h"
-#include "firmware-sdk/ei_device_interface.h"
-#include "firmware-sdk/ei_device_memory.h"
-
-//TODO: only for ei_putc declaration, remove after upgrading fw-sdk
-#include "firmware-sdk/ei_device_interface.h"
-
+#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 
 //TODO: only for compatibility with ei_image_lib, remove after upgrading fw-sdk
 void ei_putc(char c)
@@ -72,12 +65,16 @@ int main(void)
   ei_environment_sensor_init();
   ei_hall_sensor_init();
   ei_inertial_init();
-  ei_interaction_sensor_init();
+  ei_ambient_sensor_init();
+
+  dev->set_state(eiStateFinished);
 
   // Init AT Server and print initial prompt
   at = ei_at_init(dev);
   ei_printf("Type AT+HELP to see a list of commands.\r\n");
   at->print_prompt();
+
+  ble_init();
 
   while (1) {
     sl_system_process_action();

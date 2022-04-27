@@ -23,6 +23,7 @@
 #ifndef EI_DEVICE_XG24_H
 #define EI_DEVICE_XG24_H
 
+#include "sl_simple_led.h"
 #include "sl_sleeptimer.h"
 #include "firmware-sdk/ei_device_info_lib.h"
 #include "firmware-sdk/ei_device_memory.h"
@@ -52,12 +53,14 @@ public:
     bool is_camera_present(void);
     bool start_sample_thread(void (*sample_read_cb)(void), float sample_interval_ms) override;
     bool stop_sample_thread(void) override;
+
     void set_state(EiState state) override;
     EiState get_state(void);
+    void set_led(const sl_led_t *led_handle, uint8_t state);
+    void toggle_led(const sl_led_t *led_handle);
+
     bool get_sensor_list(const ei_device_sensor_t **sensor_list, size_t *sensor_list_size) override;
     EiSnapshotProperties get_snapshot_list(void);
-    void set_default_data_output_baudrate(void) override;
-    void set_max_data_output_baudrate(void) override;
     uint32_t get_data_output_baudrate(void) override;
 };
 

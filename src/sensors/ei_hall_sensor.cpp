@@ -49,13 +49,13 @@ bool ei_hall_sensor_init(void)
     ei_sleep(1);
     ret = sl_si7210_init(sl_i2cspm_sensor);
     if(ret != SL_STATUS_OK) {
-        ei_printf("ERR: failed to init hall sensor (0x%x)\n", ret);
+        ei_printf("ERR: failed to init hall sensor (0x%04lx)\n", ret);
         return false;
     }
 
     ret = sl_si7210_configure(sl_i2cspm_sensor, &hall_config);
     if(ret != SL_STATUS_OK) {
-        ei_printf("ERR: failed to configure hall sensor (0x%x)\n", ret);
+        ei_printf("ERR: failed to configure hall sensor (0x%04lx)\n", ret);
         return false;
     }
 

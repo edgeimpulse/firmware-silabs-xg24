@@ -27,6 +27,7 @@
 #include "firmware-sdk/at-server/ei_at_command_set.h"
 #include "firmware-sdk/at_base64_lib.h"
 #include "firmware-sdk/ei_image_lib.h"
+#include "firmware-sdk/ei_device_lib.h"
 #include "inference/ei_run_impulse.h"
 #include "model-parameters/model_metadata.h"
 #include "sensors/ei_camera_arducam.h"
@@ -185,6 +186,8 @@ bool at_read_buffer(const char **argv, const int argc)
     size_t start = (size_t)atoi(argv[0]);
     size_t length = (size_t)atoi(argv[1]);
 
+    dev->set_state(eiStateUploading);
+
     bool use_max_baudrate = false;
     if (argc >= 3 && argv[2][0] == 'y') {
        use_max_baudrate = true;
@@ -196,7 +199,7 @@ bool at_read_buffer(const char **argv, const int argc)
         ei_sleep(100);
     }
 
-    success = dev->read_encode_send_sample_buffer(start, length);
+    success = read_encode_send_sample_buffer(start, length);
 
     if (use_max_baudrate) {
         ei_printf("\r\nOK\r\n");
@@ -205,10 +208,12 @@ bool at_read_buffer(const char **argv, const int argc)
     }
 
     if (!success) {
-        ei_printf("Failed to read from buffer\n");
+        ei_printf("ERR: Failed to read from buffer\n");
+        dev->set_state(eiStateIdle);
     }
     else {
         ei_printf("\n");
+        dev->set_state(eiStateFinished);
     }
 
     return true;
@@ -230,6 +235,10 @@ bool at_sample_start(const char **argv, const int argc)
         if (strcmp(sensor_list[ix].name, argv[0]) == 0) {
             if (!sensor_list[ix].start_sampling_cb()) {
                 ei_printf("ERR: Failed to start sampling\n");
+                dev->set_state(eiStateIdle);
+            }
+            else {
+                dev->set_state(eiStateFinished);
             }
             return true;
         }
@@ -238,6 +247,10 @@ bool at_sample_start(const char **argv, const int argc)
     if (ei_connect_fusion_list(argv[0], SENSOR_FORMAT)) {
         if (!ei_fusion_setup_data_sampling()) {
             ei_printf("ERR: Failed to start sensor fusion sampling\n");
+            dev->set_state(eiStateIdle);
+        }
+        else {
+            dev->set_state(eiStateFinished);
         }
     }
     else {
@@ -250,7 +263,7 @@ bool at_sample_start(const char **argv, const int argc)
 
 bool at_run_impulse(void)
 {
-    ei_start_impulse(false, false);
+    ei_start_impulse(false, false, false);
 
     return false;
 }
@@ -269,7 +282,7 @@ bool at_run_impulse_debug(const char **argv, const int argc)
 
 bool at_run_impulse_cont(void)
 {
-    ei_start_impulse(true, false);
+    ei_start_impulse(true, false, false);
 
     return false;
 }

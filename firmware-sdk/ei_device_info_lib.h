@@ -1,9 +1,30 @@
+/* Edge Impulse firmware SDK
+ * Copyright (c) 2022 EdgeImpulse Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #ifndef EI_DEVICE_INFO_LIB
 #define EI_DEVICE_INFO_LIB
 
 /* Include ----------------------------------------------------------------- */
-#include "at_base64_lib.h"
-#include "edge-impulse-sdk/porting/ei_classifier_porting.h"
+#include "ei_camera_interface.h"
 #include "ei_config_types.h"
 #include "ei_device_memory.h"
 #include <cstdint>
@@ -26,11 +47,6 @@ typedef struct {
     bool (*start_sampling_cb)();
     //#endif
 } ei_device_sensor_t;
-
-typedef struct {
-    uint16_t width;
-    uint16_t height;
-} ei_device_snapshot_resolutions_t;
 
 typedef struct {
     char str[32];
@@ -150,12 +166,12 @@ public:
         return memory;
     }
 
-    virtual std::string get_device_type(void)
+    virtual const std::string& get_device_type(void)
     {
         return device_type;
     }
 
-    virtual std::string get_device_id(void)
+    virtual const std::string& get_device_id(void)
     {
         return device_id;
     }
@@ -167,7 +183,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_management_url(void)
+    virtual const std::string& get_management_url(void)
     {
         return management_url;
     }
@@ -179,7 +195,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_sample_hmac_key(void)
+    virtual const std::string& get_sample_hmac_key(void)
     {
         return sample_hmac_key;
     }
@@ -191,7 +207,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_sample_label(void)
+    virtual const std::string& get_sample_label(void)
     {
         return sample_label;
     }
@@ -227,7 +243,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_upload_host(void)
+    virtual const std::string& get_upload_host(void)
     {
         return upload_host;
     }
@@ -239,7 +255,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_upload_path(void)
+    virtual const std::string& get_upload_path(void)
     {
         return upload_path;
     }
@@ -251,7 +267,7 @@ public:
         save_config();
     }
 
-    virtual std::string get_upload_api_key(void)
+    virtual const std::string& get_upload_api_key(void)
     {
         return upload_api_key;
     }
@@ -339,41 +355,6 @@ public:
     {
         return false;
     }
-
-    bool read_encode_send_sample_buffer(size_t address, size_t length)
-    {
-        size_t pos = address;
-        size_t bytes_left = length;
-        bool retVal;
-
-
-        // we're encoding as base64 in AT+READFILE, so this needs to be divisable by 3
-        uint8_t buffer[513];
-        while (1) {
-            size_t bytes_to_read = sizeof(buffer);
-            if (bytes_to_read > bytes_left) {
-                bytes_to_read = bytes_left;
-            }
-            if (bytes_to_read == 0) {
-                retVal = true;
-                break;
-            }
-
-            int r = this->memory->read_sample_data(buffer, pos, bytes_to_read);
-            if (r != (int)bytes_to_read) {
-                retVal = false;
-                break;
-            }
-            base64_encode((char *)buffer, bytes_to_read, ei_putchar);
-
-            pos += bytes_to_read;
-            bytes_left -= bytes_to_read;
-        }
-
-        return retVal;
-    }
-
-
 
     virtual void set_state(EiState) {};
 

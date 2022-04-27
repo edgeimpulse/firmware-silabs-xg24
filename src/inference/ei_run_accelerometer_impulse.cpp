@@ -24,7 +24,10 @@
 #if defined(EI_CLASSIFIER_SENSOR) && EI_CLASSIFIER_SENSOR == EI_CLASSIFIER_SENSOR_ACCELEROMETER
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 #include "edge-impulse-sdk/dsp/numpy.hpp"
+#include "firmware-sdk/ei_device_info_lib.h"
 #include "sensors/ei_inertial_sensor.h"
+#include "ei_run_impulse.h"
+#include "ble.h"
 
 typedef enum {
     INFERENCE_STOPPED,
@@ -48,33 +51,33 @@ static int samples_wr_index = 0;
  */
 bool samples_callback(const void *raw_sample, uint32_t raw_sample_size)
 {
-    if(state == INFERENCE_STOPPED) {
-        // see: sample_timer_callback in ei_inertial_sensor.cpp why we have to return true
+    if(state != INFERENCE_SAMPLING) {
+        // stop collecting samples if we are not in SAMPLING state
         return true;
-    }
-    else if(state != INFERENCE_SAMPLING) {
-        // don't collect samples if we are not in SAMPLING state
-        return false;
     }
 
     float *sample = (float *)raw_sample;
 
     for(int i = 0; i < (int)(raw_sample_size / sizeof(float)); i++) {
         samples_circ_buff[samples_wr_index++] = sample[i];
-        if(samples_wr_index >= samples_per_inference) {
-            state = INFERENCE_DATA_READY;
-        }
         if(samples_wr_index > EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE) {
             /* start from beginning of the circular buffer */
             samples_wr_index = 0;
         }
-    }   
+        if(samples_wr_index >= samples_per_inference) {
+            state = INFERENCE_DATA_READY;
+            return true;
+        }
+    }
 
     return false;
 }
 
 static void display_results(ei_impulse_result_t* result)
 {
+    float max = 0.0f;
+    size_t max_ix = 0;
+
     ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
         result->timing.dsp, result->timing.classification, result->timing.anomaly);
     for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {            
@@ -83,26 +86,38 @@ static void display_results(ei_impulse_result_t* result)
 #if EI_CLASSIFIER_HAS_ANOMALY == 1
     ei_printf("    anomaly score: %f\r\n", result->anomaly);
 #endif
+
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {       
+        if (result->classification[ix].value > max) {
+            max = result->classification[ix].value;
+            max_ix = ix;
+        }
+    }
+
+    ble_send_classifier_output(result->classification[max_ix].label);
 }
 
 void ei_run_impulse(void)
 {
+    EiDeviceInfo *dev = EiDeviceInfo::get_device();
     switch(state) {
         case INFERENCE_STOPPED:
             // nothing to do
             return;
         case INFERENCE_WAITING:
-            if(ei_read_timer_ms() > (last_inference_ts + 2000)) {
-                state = INFERENCE_SAMPLING;
-            }
-            else {
+            if(ei_read_timer_ms() < (last_inference_ts + 2000)) {
                 return;
             }
-            break;
+            state = INFERENCE_SAMPLING;
+            // start sampling now, don't collect samples during waiting period
+            ei_accel_sample_start(&samples_callback, EI_CLASSIFIER_INTERVAL_MS);
+            dev->set_state(eiStateSampling);
+            return;
         case INFERENCE_SAMPLING:
             // wait for data to be collected through callback
             return;
         case INFERENCE_DATA_READY:
+            dev->set_state(eiStateIdle);
             // nothing to do, just continue to inference provcessing below
             break;
         default:
@@ -160,20 +175,23 @@ void ei_run_impulse(void)
 
 void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed)
 {
-    const float sample_length = 1000.0f * static_cast<float>(EI_CLASSIFIER_RAW_SAMPLE_COUNT) /
-                        (1000.0f / static_cast<float>(EI_CLASSIFIER_INTERVAL_MS));
+    EiDeviceInfo *dev = EiDeviceInfo::get_device();
 
     continuous_mode = continuous;
     debug_mode = debug;
 
     // summary of inferencing settings (from model_metadata.h)
     ei_printf("Inferencing settings:\n");
-    ei_printf("\tInterval: %fms.", (float)EI_CLASSIFIER_INTERVAL_MS);
+    ei_printf("\tInterval: %.04fms.\n", (float)EI_CLASSIFIER_INTERVAL_MS);
     ei_printf("\tFrame size: %d\n", EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE);
-    ei_printf("\tSample length: %f ms.", sample_length);
+    ei_printf("\tSample length: %.02f ms.\n", (float)(EI_CLASSIFIER_RAW_SAMPLE_COUNT * EI_CLASSIFIER_INTERVAL_MS));
     ei_printf("\tNo. of classes: %d\n", sizeof(ei_classifier_inferencing_categories) /
                                             sizeof(ei_classifier_inferencing_categories[0]));
     ei_printf("Starting inferencing, press 'b' to break\n");
+
+    // set required sample length, so accelerometer driver will now how many samples to collect
+    dev->set_sample_length_ms(EI_CLASSIFIER_RAW_SAMPLE_COUNT * EI_CLASSIFIER_INTERVAL_MS);
+    dev->set_sample_interval_ms(EI_CLASSIFIER_INTERVAL_MS);
 
     if (continuous == true) {
         samples_per_inference = EI_CLASSIFIER_SLICE_SIZE * EI_CLASSIFIER_RAW_SAMPLES_PER_FRAME;
@@ -192,19 +210,18 @@ void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed)
         last_inference_ts = ei_read_timer_ms();
         state = INFERENCE_WAITING;
     }
-
-    ei_accel_sample_start(&samples_callback, EI_CLASSIFIER_INTERVAL_MS);
 }
 
 void ei_stop_impulse(void) 
 {
+    EiDeviceInfo *dev = EiDeviceInfo::get_device();
     if(state != INFERENCE_STOPPED) {
+        state = INFERENCE_STOPPED;
         ei_printf("Inferencing stopped by user\r\n");
-        // EiDevice.set_state(eiStateFinished);
+        dev->set_state(eiStateFinished);
         /* reset samples buffer */
         samples_wr_index = 0;
     }
-    state = INFERENCE_STOPPED;
 }
 
 bool is_inference_running(void)

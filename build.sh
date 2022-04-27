@@ -26,7 +26,6 @@ set -e
 PROJECT_FILE=firmware-xg24.slcp
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-OUTPUT_DIR=${SCRIPTPATH}/generated/
 PROJECT_NAME=$(grep project_name ${PROJECT_FILE} | cut -d':' -f2 | xargs)
 SLC_BIN="slc"
 
@@ -44,6 +43,10 @@ for i in "$@"; do
       FLASH=1
       shift # past argument
       ;;
+    -p|--purge)
+      PURGE=1
+      shift # past argument
+      ;;
     -s=*|--slc=*)
       SLC_BIN="${i#*=}"
       shift # past argument=value
@@ -54,20 +57,31 @@ for i in "$@"; do
   esac
 done
 
-if [ ! -z ${CLEAN} ];
+# remove all generated files (useful to recreate the project from scratch)
+if [ ! -z ${PURGE} ];
 then
-    rm -rf ${OUTPUT_DIR}
+    rm -rf autogen/
+    rm -rf build/
+    rm -rf gecko_sdk_?.?.?/
+    rm -f ${PROJECT_NAME}.Makefile
+    rm -f ${PROJECT_NAME}.project.mak
+    rm -f ${PROJECT_NAME}.slps
+elif [ ! -z ${CLEAN} ];
+then
+    make -f ${PROJECT_NAME}.Makefile clean
 fi
 
 if [ ! -z ${BUILD} ];
 then
-    ${SLC_BIN} generate ${PROJECT_FILE} -d ${OUTPUT_DIR} -cp -np --toolchain gcc
-    cd ${OUTPUT_DIR}
+    # if there is no Makefile, then recreate the project
+    if [ ! -f ${PROJECT_NAME}.Makefile ];
+    then
+        ${SLC_BIN} generate ${PROJECT_FILE} -cp -np --toolchain=gcc --output-type=makefile
+    fi
     make -j -f ${PROJECT_NAME}.Makefile
-    cd -
 fi
 
 if [ ! -z ${FLASH} ];
 then
-    commander flash ${OUTPUT_DIR}/build/debug/${PROJECT_NAME}.hex
+    commander flash build/debug/${PROJECT_NAME}.hex
 fi

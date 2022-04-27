@@ -43,8 +43,9 @@ private:
 
 public:
     EiCameraArduCam();
+    bool init(uint16_t width, uint16_t height);
     bool ei_camera_capture_jpeg(uint8_t **image, uint32_t *image_size, uint16_t width, uint16_t height);
-    bool ei_camera_capture_rgb888_packed_big_endian(uint8_t *image, uint32_t image_size, uint16_t width, uint16_t height);
+    bool ei_camera_capture_rgb888_packed_big_endian(uint8_t *image, uint32_t image_size);
     bool set_resolution(const ei_device_snapshot_resolutions_t res);
     ei_device_snapshot_resolutions_t get_min_resolution(void);
     bool is_camera_present(void);

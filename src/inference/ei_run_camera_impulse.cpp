@@ -27,6 +27,9 @@
 #include "firmware-sdk/jpeg/encode_as_jpg.h"
 #include "sensors/ei_camera_arducam.h"
 #include "jpegdec/jpegdec.h"
+#include "ei_run_impulse.h"
+#include "ble.h"
+#include <cstdio>
 
 #define DWORD_ALIGN_PTR(a)   ((a & 0x3) ?(((uintptr_t)a + 0x4) & ~(uintptr_t)0x3) : a)
 
@@ -66,6 +69,35 @@ static int ei_camera_get_data(size_t offset, size_t length, float *out_ptr)
 
     // and done!
     return 0;
+}
+
+static void send_results_over_ble(ei_impulse_result_t* result)
+{
+    const int buffer_size = 64;
+    char buffer[buffer_size];
+    uint8_t obj_count = 0;
+
+    ble_send_classifier_output("Inference results:");
+#if EI_CLASSIFIER_OBJECT_DETECTION == 1
+    bool bb_found = result->bounding_boxes[0].value > 0;
+    for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+        auto bb = result->bounding_boxes[ix];
+        if (bb.value == 0) {
+            continue;
+        }
+        snprintf(buffer, buffer_size, "Found %u: %s (%.5f)", ++obj_count, bb.label, bb.value);
+        ble_send_classifier_output(buffer);
+    }
+    if (!bb_found) {
+        ble_send_classifier_output("No objects found");
+    }
+#else
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+        snprintf(buffer, buffer_size, "Found %u: %s (%.5f)", ++obj_count, result->classification[ix].label, result->classification[ix].value);
+        ble_send_classifier_output(buffer);
+    }
+#endif
+
 }
 
 void ei_run_impulse(void)
@@ -113,7 +145,7 @@ void ei_run_impulse(void)
     }
 
     // jpeg_image buffer is allocated by the camera driver, but in case of fail it is deallocated
-    // so we don't need to worry about it
+    // so we don't need to worry about it here, but later it has to be free
     if(cam->ei_camera_capture_jpeg(&jpeg_image, &jpeg_image_size, snapshot_resolution.width, snapshot_resolution.height) == false) {
         ei_printf("ERR: Failed to take a snapshoit!\n");
         ei_free(snapshot_buf);
@@ -152,7 +184,7 @@ void ei_run_impulse(void)
             ei_printf("ERR: Failed to encode frame as JPEG (%d)\n", ret);
         }
     }
-    free(jpeg_image);
+    ei_free(jpeg_image);
     jpeg_image_size = 0;
 
 
@@ -193,6 +225,8 @@ void ei_run_impulse(void)
 #endif
 #endif
 
+    send_results_over_ble(&result);
+
     if (debug_mode) {
         ei_printf("End output\n");
     }
@@ -214,8 +248,8 @@ void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed)
         return;
     }
 
-    snapshot_resolution = cam->try_set_resolution(EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT);
-    if(snapshot_resolution.width == 0) {
+    snapshot_resolution = cam->search_resolution(EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT);
+    if(cam->set_resolution(snapshot_resolution) == false) {
         ei_printf("ERR: Failed to set snapshot resolution (%ux%u)!\n", EI_CLASSIFIER_INPUT_WIDTH, EI_CLASSIFIER_INPUT_HEIGHT);
         return;
     }

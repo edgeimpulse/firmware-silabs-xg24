@@ -21,10 +21,11 @@
  */
 
 #include "ei_camera_arducam.h"
+#include "ei_device_xg24.h"
 #include "jpegdec/jpegdec.h"
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 #include "edge-impulse-sdk/dsp/image/image.hpp"
-#include "ei_device_xg24.h"
+#include "firmware-sdk/at_base64_lib.h"
 #include <cmath>
 
 
@@ -48,6 +49,19 @@ EiCameraArduCam::EiCameraArduCam()
     this->cam->InitCAM();
     //TODO: add API to change that resolution?
     this->cam->OV2640_set_JPEG_size(OV2640_160x120);
+}
+
+bool EiCameraArduCam::init(uint16_t width, uint16_t height)
+{
+    // try to set required resolution, returned is possible
+    ei_device_snapshot_resolutions_t sensor_res = this->search_resolution(width, height);
+
+    if(set_resolution(sensor_res) == 0) {
+        ei_printf("ERR: Failed to set camera resolution!\n");
+        return false;
+    }
+
+    return true;
 }
 
 bool EiCameraArduCam::set_resolution(const ei_device_snapshot_resolutions_t res)
@@ -99,6 +113,7 @@ bool EiCameraArduCam::is_camera_present(void)
 bool EiCameraArduCam::ei_camera_capture_jpeg(uint8_t **image, uint32_t *image_size, uint16_t width, uint16_t height)
 {
     //TODO: change resolution if needed
+    // Remember to free image buffer!
     *image_size = this->cam->capture_frame(image);
     if(*image == nullptr || *image_size == 0) {
         ei_printf("Error getting snapshot!\n");
@@ -108,7 +123,7 @@ bool EiCameraArduCam::ei_camera_capture_jpeg(uint8_t **image, uint32_t *image_si
     return true;
 }
 
-bool EiCameraArduCam::ei_camera_capture_rgb888_packed_big_endian(uint8_t *image, uint32_t image_size, uint16_t width, uint16_t height)
+bool EiCameraArduCam::ei_camera_capture_rgb888_packed_big_endian(uint8_t *image, uint32_t image_size)
 {
     uint8_t *jpeg_image = nullptr;
     uint32_t jpeg_image_size;
@@ -137,14 +152,14 @@ void EiCameraArduCam::get_resolutions(ei_device_snapshot_resolutions_t **res, ui
 bool EiCameraArduCam::start_stream(uint32_t width, uint32_t height)
 {
     // try to set required resolution, returned is what has been set
-    ei_device_snapshot_resolutions_t snapshot_res = this->try_set_resolution(width, height);
-    
-    if(snapshot_res.width == 0) {
+    ei_device_snapshot_resolutions_t sensor_res = this->search_resolution(width, height);
+
+    if(set_resolution(sensor_res) == 0) {
         ei_printf("ERR: Failed to set camera resolution!\n");
         return false;
     }
 
-    // store required ouptut res
+    // store required output res
     this->output_width = width;
     this->output_height = height;
 
@@ -170,7 +185,7 @@ bool EiCameraArduCam::run_stream(void)
         return false;
     }
 
-    ei_camera_capture_rgb888_packed_big_endian(this->stream_buffer, this->stream_buffer_size, this->width, this->height);
+    ei_camera_capture_rgb888_packed_big_endian(this->stream_buffer, this->stream_buffer_size);
 
     if (this->stream_do_resize) {
         // interpolate in place

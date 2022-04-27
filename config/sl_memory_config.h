@@ -9,7 +9,7 @@
 // <i> The stack size configured here will be used by the stack that the
 // <i> application uses when coming out of a reset.
 #ifndef SL_STACK_SIZE
-  #define SL_STACK_SIZE  4096
+  #define SL_STACK_SIZE  8192
 #endif
 
 // <o SL_HEAP_SIZE> Minimum heap size for the application.
@@ -19,7 +19,7 @@
 // <i> size that is guaranteed to be available. The available heap may be larger
 // <i> to make use of any memory that would otherwise remain unused.
 #ifndef SL_HEAP_SIZE
-  #define SL_HEAP_SIZE   0x10a00
+  #define SL_HEAP_SIZE   204800
 #endif
 
 // </h>

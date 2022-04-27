@@ -1,5 +1,5 @@
-/* Edge Impulse inferencing library
- * Copyright (c) 2020 EdgeImpulse Inc.
+/* Edge Impulse firmware SDK
+ * Copyright (c) 2022 EdgeImpulse Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,15 @@
  * SOFTWARE.
  */
 
-#ifndef __EICAMERA__H__
-#define __EICAMERA__H__
+#ifndef EI_CAMERA_INTERFACE_H
+#define EI_CAMERA_INTERFACE_H
 
-// inlcude only because of ei_device_snapshot_resolutions_t
-//TODO: remove after moving camera related stuff here
-#include "ei_device_info_lib.h"
-#include <stdint.h>
+#include <cstdint>
+
+typedef struct {
+    uint16_t width;
+    uint16_t height;
+} ei_device_snapshot_resolutions_t;
 
 class EiCamera {
 public:
@@ -38,16 +40,12 @@ public:
      * 
      * @param image Point to output buffer for image.  32 bit for word alignment on some platforms 
      * @param image_size Size of buffer allocated ( should be 3 * width * height ) 
-     * @param width image width size, in pixels
-     * @param height image height size, in pixels 
      * @return true If successful 
      * @return false If not successful 
      */
     virtual bool ei_camera_capture_rgb888_packed_big_endian(
         uint8_t *image,
-        uint32_t image_size,
-        uint16_t width,
-        uint16_t height) = 0; //pure virtual.  You must provide an implementation
+        uint32_t image_size) = 0; //pure virtual.  You must provide an implementation
 
     /**
      * @brief Get the min resolution supported by camera
@@ -66,31 +64,31 @@ public:
     virtual void get_resolutions(ei_device_snapshot_resolutions_t **res, uint8_t *res_num) = 0;
 
     /**
-     * @brief Set the camera resolution to desired width and heigth
+     * @brief Set the camera resolution to desired width and height
      * 
-     * @param res struct with desired widht and height of the snapshot
-     * @return true if resolution set succesfully
+     * @param res struct with desired width and height of the snapshot
+     * @return true if resolution set successfully
      * @return false if something went wrong
      */
     virtual bool set_resolution(const ei_device_snapshot_resolutions_t res) = 0;
 
     /**
-     * @brief Try to set the camera resolution to required width and heigth.
+     * @brief Try to set the camera resolution to required width and height.
      * The method is looking for best possible resolution, applies it to the camera and returns
      * (from the list of natively supported)
      * Usually required resolutions are smaller or the same as min camera resolution, because
      * many cameras support much bigger resolutions that required in TinyML models.
      * 
-     * @param required_width  required width of snapshot
+     * @param required_width required width of snapshot
      * @param required_height required height of snapshot
-     * @return ei_device_snapshot_resolutions_t return the set camera resolution, if setting
-     * resolution failed, returns null resolution (0, 0)
+     * @return ei_device_snapshot_resolutions_t returns
+     * the best match of sensor supported resolutions
+     * to user specified resolution 
      */
-    virtual ei_device_snapshot_resolutions_t try_set_resolution(uint32_t required_width, uint32_t required_height)
+    virtual ei_device_snapshot_resolutions_t search_resolution(uint32_t required_width, uint32_t required_height)
     {
         ei_device_snapshot_resolutions_t *list;
         ei_device_snapshot_resolutions_t res;
-        ei_device_snapshot_resolutions_t null_res = {0, 0};
         uint8_t list_size;
 
         get_resolutions(&list, &list_size);
@@ -99,12 +97,7 @@ public:
         // if required res is smaller than the smallest supported,
         // it's easy and just return the min supported resolution
         if(required_width <= res.width && required_height <= res.height) {
-            if(set_resolution(res) == false) {
-                return null_res;
-            }
-            else {
-                return res;
-            }
+            return res;
         }
 
         // Assuming resolutions list is ordered from smallest to biggest
@@ -117,20 +110,32 @@ public:
 
         // Ooops! There is no resolution big enough to cover the required one, return max
         res = list[list_size - 1];
-        if(set_resolution(res) == false) {
-            return null_res;
-        }
-        else {
-            return res;
-        }
+        return res;
     }
 
-    // the following are optional
+    /**
+     * @brief Call to driver to initialize camera
+     * to capture images in required resolution
+     * 
+     * @param width image width size, in pixels
+     * @param height image height size, in pixels 
+     * @return true if successful 
+     * @return false if not successful 
+     */
 
-    virtual bool init()
+    virtual bool init(uint16_t width, uint16_t height)
     {
         return true;
     }
+
+    /**
+     * @brief Call to driver to deinitialize camera
+     * and release all resources (fb, etc).
+     * 
+     * @return true if successful 
+     * @return false if not successful 
+     */
+
     virtual bool deinit()
     {
         return true;
@@ -143,4 +148,4 @@ public:
      */
     static EiCamera *get_camera();
 };
-#endif  //!__EICAMERA__H__
+#endif /* EI_CAMERA_INTERFACE_H */

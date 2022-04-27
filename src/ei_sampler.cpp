@@ -148,6 +148,8 @@ bool ei_sampler_start_sampling(void *v_ptr_payload, starter_callback ei_sample_s
     uint32_t delay_time_ms = ((sample_buffer_size / mem->block_size) + 1) * mem->block_erase_time;
     ei_printf("Starting in %lu ms... (or until all flash was erased)\n", delay_time_ms < 2000 ? 2000 : delay_time_ms);
 
+    dev->set_state(eiStateErasingFlash);
+
     if(mem->erase_sample_data(0, sample_buffer_size) != (sample_buffer_size)) {
         return false;
     }
@@ -166,6 +168,8 @@ bool ei_sampler_start_sampling(void *v_ptr_payload, starter_callback ei_sample_s
     }
 
     ei_printf("Sampling...\n");
+
+    dev->set_state(eiStateSampling);
 
     while (current_sample < samples_required) {
         ei_sleep(10);
@@ -195,7 +199,7 @@ bool ei_sampler_start_sampling(void *v_ptr_payload, starter_callback ei_sample_s
 
     uint32_t j = mem->read_sample_data(page_buffer, 0, mem->block_size);
     if (j != mem->block_size) {
-        ei_printf("Failed to read first page (%d)\n", j);
+        ei_printf("Failed to read first page (%lu)\n", j);
         ei_free(page_buffer);
         return false;
     }
@@ -222,7 +226,7 @@ bool ei_sampler_start_sampling(void *v_ptr_payload, starter_callback ei_sample_s
 
     j = mem->erase_sample_data(0, mem->block_size);
     if (j != mem->block_size) {
-        ei_printf("Failed to erase first page (%d)\n", j);
+        ei_printf("Failed to erase first page (%lu)\n", j);
         ei_free(page_buffer);
         return false;
     }
@@ -232,7 +236,7 @@ bool ei_sampler_start_sampling(void *v_ptr_payload, starter_callback ei_sample_s
     ei_free(page_buffer);
 
     if (j != mem->block_size) {
-        ei_printf("Failed to write first page with updated hash (%d)\n", j);
+        ei_printf("Failed to write first page with updated hash (%lu)\n", j);
         return false;
     }
 
@@ -280,8 +284,7 @@ static bool create_header(sensor_aq_payload_info *payload)
 
     // Write to blockdevice
     tr = mem->write_sample_data((uint8_t*)ei_mic_ctx.cbor_buffer.ptr, 0, end_of_header_ix);
-
-    if (tr != end_of_header_ix) {
+    if ((size_t)tr != end_of_header_ix) {
         ei_printf("Failed to write to header blockdevice (%d)\n", tr);
         return false;
     }
@@ -306,7 +309,7 @@ static bool sample_data_callback(const void *sample_buf, uint32_t byteLenght)
 {
     sensor_aq_add_data(&ei_mic_ctx, (float *)sample_buf, byteLenght / sizeof(float));
 
-    if (++current_sample > samples_required) {
+    if (++current_sample >= samples_required) {
         return true;
     } 
     else {

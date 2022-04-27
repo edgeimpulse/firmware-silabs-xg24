@@ -23,11 +23,20 @@
 #ifndef EI_RUN_IMPULSE_H
 #define EI_RUN_IMPULSE_H
 
-#include <cstdint>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed = false);
+#include <stdint.h>
+#include <stdbool.h>
+
+void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed);
 void ei_run_impulse(void);
 void ei_stop_impulse(void);
 bool is_inference_running(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* EI_RUN_IMPULSE_H */

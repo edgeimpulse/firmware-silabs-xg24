@@ -89,7 +89,7 @@ Edge Impulse enables developers to create the next generation of intelligent dev
 
     ![Project Configuration](doc/import5.png)
 
-1. We have to make a small tweak. In the `Project Explorer` panel, right click on the `model` directory and choose `Delete`
+1. We have to make a small tweak. In the `Project Explorer` panel, right click on the `ei-model` directory and choose `Delete`
 
     ![Project Explorer](doc/import6.png)
 
