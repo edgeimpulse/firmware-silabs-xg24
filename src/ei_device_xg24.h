@@ -36,7 +36,7 @@ private:
     sl_sleeptimer_timer_handle_t sample_timer;
     sl_sleeptimer_timer_handle_t led_timer;
     EiState state;
-    static const int standalone_sensor_num = 2;
+    static const int standalone_sensor_num = 1;
     ei_device_sensor_t standalone_sensor_list[standalone_sensor_num];
     bool camera_present;
     EiCameraArduCam *cam;

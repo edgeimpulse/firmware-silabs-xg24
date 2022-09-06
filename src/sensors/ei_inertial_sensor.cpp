@@ -28,14 +28,11 @@
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 #include "firmware-sdk/sensor_aq.h"
 #include "sl_imu.h"
-#include "sl_sleeptimer.h"
 
 /* Constant defines -------------------------------------------------------- */
 #define CONVERT_G_TO_MS2    9.80665f
 
-sampler_callback inertial_cb_sampler;
 static float imu_data[INERTIAL_AXIS_SAMPLED];
-static sl_sleeptimer_timer_handle_t sample_timer;
 
 bool ei_inertial_init(void)
 {
@@ -54,84 +51,6 @@ bool ei_inertial_init(void)
         ei_printf("ERR: failed to register Inertial sensor!\n");
         return false;
     }
-
-    return true;
-}
-
-static void sample_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
-{
-    if(sl_imu_is_data_ready()) {
-        sl_imu_update();
-        sl_imu_get_acceleration_raw_data(imu_data);
-        imu_data[0] *= CONVERT_G_TO_MS2;
-        imu_data[1] *= CONVERT_G_TO_MS2;
-        imu_data[2] *= CONVERT_G_TO_MS2;
-    }
-    else {
-        ei_printf("ERR: no Accel data!\n");
-        imu_data[0] = 0.0f;
-        imu_data[1] = 0.0f;
-        imu_data[2] = 0.0f;
-    }
-
-    if(inertial_cb_sampler((const void *)&imu_data[0], SIZEOF_ACCEL_AXIS_SAMPLED) == true) {
-        sl_sleeptimer_stop_timer(&sample_timer);
-    }
-}
-
-bool ei_accel_sample_start(sampler_callback callsampler, float sample_interval_ms)
-{
-    EiDeviceInfo* dev = EiDeviceInfo::get_device();
-    sl_status_t ret;
-    inertial_cb_sampler = callsampler;
-
-    ret = sl_sleeptimer_start_periodic_timer_ms(&sample_timer,
-                                          dev->get_sample_interval_ms(),
-                                          sample_timer_callback,
-                                          0,
-                                          0,
-                                          SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
-    if (ret != SL_STATUS_OK) {
-        ei_printf("ERR: Failed to start sample timer (0x%04lx)\n", ret);
-        return false;
-    }
-
-    return true;
-}
-
-bool ei_accel_setup_data_sampling(void)
-{
-    EiDeviceXG24* dev = static_cast<EiDeviceXG24*>(EiDeviceInfo::get_device());
-    EiDeviceMemory *mem = dev->get_memory();
-
-    if (dev->get_sample_interval_ms() < 10.0f ) {
-        dev->set_sample_interval_ms(10.0f);
-    }
-
-    // Calculate number of bytes available on flash for sampling, reserve 1 block for header + overhead
-    uint32_t available_bytes = (mem->get_available_sample_blocks() - 1) * mem->block_size;
-
-    // Check available sample size before sampling for the selected frequency
-    uint32_t requested_bytes = ceil((dev->get_sample_length_ms() / dev->get_sample_interval_ms()) * SIZEOF_ACCEL_AXIS_SAMPLED * 2);
-    if(requested_bytes > available_bytes) {
-        ei_printf("ERR: Sample length is too long. Maximum allowed is %ims at %.1fHz.\r\n", 
-            (int)floor(available_bytes / ((SIZEOF_ACCEL_AXIS_SAMPLED * 2) / dev->get_sample_interval_ms())),
-            (1000 / dev->get_sample_interval_ms()));
-        return false;
-    }
-
-    sensor_aq_payload_info payload = {
-        // Unique device ID (optional), set this to e.g. MAC address or device EUI **if** your device has one
-        dev->get_device_id().c_str(),
-        // Device type (required), use the same device type for similar devices
-        dev->get_device_type().c_str(),
-        // How often new data is sampled in ms. (100Hz = every 10 ms.)
-        dev->get_sample_interval_ms(),
-        // The axes which you'll use. The units field needs to comply to SenML units (see https://www.iana.org/assignments/senml/senml.xhtml)
-        { { "accX", "m/s2" }, { "accY", "m/s2" }, { "accZ", "m/s2" }, },
-    };
-
-    ei_sampler_start_sampling(&payload, &ei_accel_sample_start, SIZEOF_ACCEL_AXIS_SAMPLED);
 
     return true;
 }

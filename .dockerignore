@@ -1,0 +1,14 @@
+build/
+autogen/
+gecko_sdk_*/
+firmware-sdk/
+ei-model/
+src/
+*.slps
+*.slcp
+*.Makefile
+*.emProject
+*.project.mak
+*.pintool
+build.sh
+README.model

@@ -21,7 +21,7 @@
  */
 
 #include "model-parameters/model_metadata.h"
-#if defined(EI_CLASSIFIER_SENSOR) && EI_CLASSIFIER_SENSOR == EI_CLASSIFIER_SENSOR_CAMERA
+#if defined(EI_CLASSIFIER_SENSOR) && (EI_CLASSIFIER_SENSOR == EI_CLASSIFIER_SENSOR_CAMERA)
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 #include "edge-impulse-sdk/dsp/image/image.hpp"
 #include "firmware-sdk/jpeg/encode_as_jpg.h"
@@ -80,7 +80,7 @@ static void send_results_over_ble(ei_impulse_result_t* result)
     ble_send_classifier_output("Inference results:");
 #if EI_CLASSIFIER_OBJECT_DETECTION == 1
     bool bb_found = result->bounding_boxes[0].value > 0;
-    for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+    for (size_t ix = 0; ix < result.bounding_boxes_count; ix++) {
         auto bb = result->bounding_boxes[ix];
         if (bb.value == 0) {
             continue;
@@ -204,7 +204,7 @@ void ei_run_impulse(void)
                 result.timing.dsp, result.timing.classification, result.timing.anomaly);
 #if EI_CLASSIFIER_OBJECT_DETECTION == 1
     bool bb_found = result.bounding_boxes[0].value > 0;
-    for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+    for (size_t ix = 0; ix < result.bounding_boxes_count; ix++) {
         auto bb = result.bounding_boxes[ix];
         if (bb.value == 0) {
             continue;

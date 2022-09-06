@@ -33,8 +33,6 @@
 
 /* Function prototypes ----------------------------------------------------- */
 bool ei_inertial_init(void);
-bool ei_accel_sample_start(sampler_callback callback, float sample_interval_ms);
-bool ei_accel_setup_data_sampling(void);
 float *ei_fusion_inertial_read_data(int n_samples);
 
 static const ei_device_fusion_sensor_t inertial_sensor = {

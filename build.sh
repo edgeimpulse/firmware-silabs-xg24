@@ -68,14 +68,25 @@ then
     rm -f ${PROJECT_NAME}.slps
 elif [ ! -z ${CLEAN} ];
 then
-    make -f ${PROJECT_NAME}.Makefile clean
+    if [ -f ${PROJECT_NAME}.Makefile ];
+    then
+        make -f ${PROJECT_NAME}.Makefile clean
+    fi
 fi
 
 if [ ! -z ${BUILD} ];
 then
+    if [ ! -d firmware-sdk ]; then
+        echo "Firmware SDK not found."
+        exit 1
+    fi
     # if there is no Makefile, then recreate the project
     if [ ! -f ${PROJECT_NAME}.Makefile ];
     then
+        if [ $? -ne 0 ]; then
+            echo "Failed to create SLCC component file."
+            exit 1
+        fi
         ${SLC_BIN} generate ${PROJECT_FILE} -cp -np --toolchain=gcc --output-type=makefile
     fi
     make -j -f ${PROJECT_NAME}.Makefile

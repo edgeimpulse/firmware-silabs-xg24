@@ -21,7 +21,7 @@
  */
 
 #include "model-parameters/model_metadata.h"
-#if defined(EI_CLASSIFIER_SENSOR) && EI_CLASSIFIER_SENSOR == EI_CLASSIFIER_SENSOR_MICROPHONE
+#if defined(EI_CLASSIFIER_SENSOR) && (EI_CLASSIFIER_SENSOR == EI_CLASSIFIER_SENSOR_MICROPHONE)
 #include "edge-impulse-sdk/classifier/ei_run_classifier.h"
 #include "edge-impulse-sdk/dsp/numpy.hpp"
 #include "firmware-sdk/ei_device_info_lib.h"
@@ -45,28 +45,43 @@ static bool debug_mode = false;
 static float samples_circ_buff[EI_CLASSIFIER_DSP_INPUT_FRAME_SIZE];
 static int samples_wr_index = 0;
 
-static void display_results(ei_impulse_result_t* result)
+static void timing_and_classification(ei_impulse_result_t* result)
 {
-    float max = 0.0f;
-    size_t max_ix = 0;
-
     ei_printf("Predictions (DSP: %d ms., Classification: %d ms., Anomaly: %d ms.): \n",
         result->timing.dsp, result->timing.classification, result->timing.anomaly);
-    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {            
-        ei_printf("    %s: \t%f\r\n", result->classification[ix].label, result->classification[ix].value);
+    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+        ei_printf("    %s: \t", result->classification[ix].label);
+        ei_printf_float(result->classification[ix].value);
+        ei_printf("\r\n");
     }
 #if EI_CLASSIFIER_HAS_ANOMALY == 1
-    ei_printf("    anomaly score: %f\r\n", result->anomaly);
+        ei_printf("    anomaly score: ");
+        ei_printf_float(result->anomaly);
+        ei_printf("\r\n");
 #endif
+}
 
-    for (size_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {       
-        if (result->classification[ix].value > max) {
-            max = result->classification[ix].value;
-            max_ix = ix;
+static void display_results(ei_impulse_result_t* result)
+{
+    if(continuous_mode == true) {
+        if(result->label_detected >= 0) {
+            ei_printf("LABEL DETECTED : %s\r\n", result->classification[result->label_detected].label);
+            ble_send_classifier_output(result->classification[result->label_detected].label);
+            timing_and_classification(result);
+        }
+        else {
+            const char spinner[] = {'/', '-', '\\', '|'};
+            static int spin = 0;
+            ei_printf("Running inference %c\r", spinner[spin]);
+
+            if(++spin >= sizeof(spinner)) {
+                spin = 0;
+            }
         }
     }
-
-    ble_send_classifier_output(result->classification[max_ix].label);
+    else {
+        timing_and_classification(result);
+    }
 }
 
 void ei_run_impulse(void)
@@ -185,10 +200,15 @@ void ei_stop_impulse(void)
 
     if(state != INFERENCE_STOPPED) {
         state = INFERENCE_STOPPED;
+        if(ei_microphone_inference_end() == false)
+        {
+            ei_printf("ERR: Failed to stop microphone inference\r\n");
+        }
         ei_printf("Inferencing stopped by user\r\n");
         dev->set_state(eiStateFinished);
         /* reset samples buffer */
         samples_wr_index = 0;
+        run_classifier_deinit();
     }
 }
 

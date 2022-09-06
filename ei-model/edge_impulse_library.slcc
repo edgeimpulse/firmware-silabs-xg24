@@ -107,12 +107,17 @@ include:
       - path: edge-impulse-sdk/classifier/ei_performance_calibration.h
       - path: edge-impulse-sdk/classifier/ei_aligned_malloc.h
       - path: edge-impulse-sdk/classifier/ei_run_dsp.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/drpai.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_eon.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_full.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_micro.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier_c.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier_image.h
       - path: edge-impulse-sdk/classifier/ei_classifier_config.h
       - path: edge-impulse-sdk/classifier/ei_classifier_types.h
       - path: edge-impulse-sdk/classifier/ei_signal_with_range.h
+      - path: edge-impulse-sdk/classifier/ei_fill_result_struct.h
       - path: edge-impulse-sdk/classifier/ei_model_types.h
       - path: edge-impulse-sdk/classifier/ei_classifier_smooth.h
       - path: edge-impulse-sdk/classifier/ei_signal_with_axes.h
@@ -121,12 +126,6 @@ include:
       - path: edge-impulse-sdk/third_party/gemmlowp/fixedpoint/fixedpoint_neon.h
       - path: edge-impulse-sdk/third_party/gemmlowp/fixedpoint/fixedpoint_sse.h
       - path: edge-impulse-sdk/third_party/gemmlowp/fixedpoint/fixedpoint.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/include/ethosu_driver.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/include/ethosu_device.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/include/pmu_ethosu.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu_config.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu55_interface.h
-      - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu_common.h
       - path: edge-impulse-sdk/third_party/flatbuffers/include/flatbuffers/flatbuffers.h
       - path: edge-impulse-sdk/third_party/flatbuffers/include/flatbuffers/flexbuffers.h
       - path: edge-impulse-sdk/third_party/flatbuffers/include/flatbuffers/util.h
@@ -284,11 +283,27 @@ include:
       - path: edge-impulse-sdk/dsp/memory.hpp
       - path: edge-impulse-sdk/dsp/returntypes.hpp
       - path: edge-impulse-sdk/porting/ei_classifier_porting.h
+      - path: edge-impulse-sdk/porting/ei_logging.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/include/ethosu_driver.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/include/ethosu_device.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/include/pmu_ethosu.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_config.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu55_interface.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_common.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_esp32s3.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_generic_opt.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_defs.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_ansi_headers.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_ansi_c.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h
+      - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/softmax/softmax_common.h
       - path: model-parameters/dsp_blocks.h
       - path: model-parameters/anomaly_clusters.h
       - path: model-parameters/model_variables.h
       - path: model-parameters/anomaly_types.h
       - path: model-parameters/model_metadata.h
+      - path: tflite-model/trained_model_ops_define.h
       - path: tflite-model/trained_model_compiled.h
 source:
   - path: edge-impulse-sdk/cmake/utils.cmake
@@ -838,10 +853,6 @@ source:
   - path: edge-impulse-sdk/CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_dot_prod_q31.c
   - path: edge-impulse-sdk/CMSIS/DSP/Source/ComplexMathFunctions/arm_cmplx_conj_q31.c
   - path: edge-impulse-sdk/classifier/ei_run_classifier_c.cpp
-  - path: edge-impulse-sdk/third_party/ethos-core-driver/.clang-format
-  - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu_driver.c
-  - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu_pmu.c
-  - path: edge-impulse-sdk/third_party/ethos-core-driver/src/ethosu_device.c
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/elu.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/concatenation.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/squeeze.cc
@@ -941,9 +952,12 @@ source:
   - path: edge-impulse-sdk/porting/posix/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/posix/debug_log.cpp
   - path: edge-impulse-sdk/porting/raspberry/ei_classifier_porting.cpp
-  - path: edge-impulse-sdk/porting/raspberry/debug_log.cpp
+  - path: edge-impulse-sdk/porting/renesas-ra6m5/ei_classifier_porting.cpp
+  - path: edge-impulse-sdk/porting/renesas-ra6m5/debug_log.cpp
   - path: edge-impulse-sdk/porting/himax/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/himax/debug_log.cpp
+  - path: edge-impulse-sdk/porting/infineon-psoc62/ei_classifier_porting.cpp
+  - path: edge-impulse-sdk/porting/infineon-psoc62/debug_log.cpp
   - path: edge-impulse-sdk/porting/mbed/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/mbed/debug_log.cpp
   - path: edge-impulse-sdk/porting/stm32-cubeai/ei_classifier_porting.cpp
@@ -953,11 +967,29 @@ source:
   - path: edge-impulse-sdk/porting/synaptics/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/synaptics/debug_log.cpp
   - path: edge-impulse-sdk/porting/.clang-format
+  - path: edge-impulse-sdk/porting/ethos-core-driver/.clang-format
+  - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_driver.c
+  - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_pmu.c
+  - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_device.c
   - path: edge-impulse-sdk/porting/mingw32/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/mingw32/debug_log.cpp
   - path: edge-impulse-sdk/porting/silabs/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/silabs/debug_log.cpp
   - path: edge-impulse-sdk/porting/espressif/ei_classifier_porting.cpp
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/pooling/esp_nn_avg_pool_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/pooling/esp_nn_max_pool_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/basic_math/esp_nn_mul_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/basic_math/esp_nn_add_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/fully_connected/esp_nn_fully_connected_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/activation_functions/esp_nn_relu_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/softmax/esp_nn_softmax_opt.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/softmax/esp_nn_softmax_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_conv_opt.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_conv_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_depthwise_conv_ansi.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_depthwise_conv_opt.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_conv_esp32s3.c
+  - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/convolution/esp_nn_depthwise_conv_s8_esp32s3.c
   - path: edge-impulse-sdk/porting/espressif/debug_log.cpp
   - path: edge-impulse-sdk/porting/zephyr/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/zephyr/debug_log.cpp

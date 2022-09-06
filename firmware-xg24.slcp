@@ -25,7 +25,6 @@ source:
 - {path: src/main.cpp, folder: src}
 - {path: src/drivers/ArduCAM_OV2640/ArduCAM.cpp, folder: src/drivers/ArduCAM_OV2640}
 - {path: src/drivers/MX25R3235/mx25flash_spi.c, folder: src/drivers/MX25R3235}
-- {path: src/inference/ei_run_accelerometer_impulse.cpp, folder: src/inference}
 - {path: src/inference/ei_run_audio_impulse.cpp, folder: src/inference}
 - {path: src/inference/ei_run_camera_impulse.cpp, folder: src/inference}
 - {path: src/inference/ei_run_fusion_impulse.cpp, folder: src/inference}

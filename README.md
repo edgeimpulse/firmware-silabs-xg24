@@ -115,5 +115,5 @@ Edge Impulse enables developers to create the next generation of intelligent dev
 1. Connect the board, run `Commander` and flash the following hex file
 
     ```
-    firmware-silabs-xg24-internal/firmware-generated/build/debug/firmware-silabs-xg24.hex
+    firmware-silabs-xg24/build/debug/firmware-silabs-xg24.hex
     ```

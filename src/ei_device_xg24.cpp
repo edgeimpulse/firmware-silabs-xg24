@@ -149,16 +149,10 @@ EiDeviceXG24::EiDeviceXG24(EiDeviceMemory* mem)
         led_red = nullptr;
     }
 
-    standalone_sensor_list[0].name = "Accelerometer";
-    standalone_sensor_list[0].frequencies[0] = 20.0f;
-    standalone_sensor_list[0].frequencies[1] = 62.5f;
-    standalone_sensor_list[0].frequencies[2] = 100.0f;
-    standalone_sensor_list[0].start_sampling_cb = &ei_accel_setup_data_sampling;
-    standalone_sensor_list[0].max_sample_length_s = mem->get_available_sample_bytes() / (20 * sizeof(SIZEOF_ACCEL_AXIS_SAMPLED));
-    standalone_sensor_list[1].name = "Microphone";
-    standalone_sensor_list[1].frequencies[0] = 16000.0f;
-    standalone_sensor_list[1].start_sampling_cb = &ei_microphone_sample_start;
-    standalone_sensor_list[1].max_sample_length_s = mem->get_available_sample_bytes() / (16000 * sizeof(microphone_sample_t));
+    standalone_sensor_list[0].name = "Microphone";
+    standalone_sensor_list[0].frequencies[0] = 16000.0f;
+    standalone_sensor_list[0].start_sampling_cb = &ei_microphone_sample_start;
+    standalone_sensor_list[0].max_sample_length_s = mem->get_available_sample_bytes() / (16000 * sizeof(microphone_sample_t));
 }
 
 EiDeviceXG24::~EiDeviceXG24()
