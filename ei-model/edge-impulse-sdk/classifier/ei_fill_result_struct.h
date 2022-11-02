@@ -1,23 +1,18 @@
-/* Edge Impulse inferencing library
+/*
  * Copyright (c) 2022 EdgeImpulse Inc.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an "AS
+ * IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #ifndef _EI_CLASSIFIER_FILL_RESULT_STRUCT_H_
@@ -28,8 +23,19 @@
 #include "model-parameters/model_variables.h"
 #endif
 
-#if EI_CLASSIFIER_OBJECT_DETECTION_CONSTRAINED
+#ifndef EI_HAS_OBJECT_DETECTION
+    #if (EI_CLASSIFIER_OBJECT_DETECTION_LAST_LAYER == EI_CLASSIFIER_LAST_LAYER_SSD)
+    #define EI_HAS_SSD 1
+    #endif
+    #if (EI_CLASSIFIER_OBJECT_DETECTION_LAST_LAYER == EI_CLASSIFIER_LAST_LAYER_FOMO)
+    #define EI_HAS_FOMO 1
+    #endif
+    #if (EI_CLASSIFIER_OBJECT_DETECTION_LAST_LAYER == EI_CLASSIFIER_LAST_LAYER_YOLOV5)
+    #define EI_HAS_YOLOV5 1
+    #endif
+#endif
 
+#ifdef EI_HAS_FOMO
 typedef struct cube {
     size_t x;
     size_t y;
@@ -73,12 +79,11 @@ __attribute__((unused)) static bool ei_cube_check_overlap(ei_classifier_cube_t *
     if (confidence > c->confidence) {
         c->confidence = confidence;
     }
-
     return true;
 }
 
-__attribute__((unused)) static void ei_handle_cube(std::vector<ei_classifier_cube_t*> *cubes, int x, int y, float vf, const char *label) {
-    if (vf < EI_CLASSIFIER_OBJECT_DETECTION_THRESHOLD) return;
+__attribute__((unused)) static void ei_handle_cube(std::vector<ei_classifier_cube_t*> *cubes, int x, int y, float vf, const char *label, float detection_threshold) {
+    if (vf < detection_threshold) return;
 
     bool has_overlapping = false;
     int width = 1;
@@ -106,7 +111,7 @@ __attribute__((unused)) static void ei_handle_cube(std::vector<ei_classifier_cub
     }
 }
 
-__attribute__((unused)) static void fill_result_struct_from_cubes(ei_impulse_result_t *result, std::vector<ei_classifier_cube_t*> *cubes, int out_width_factor) {
+__attribute__((unused)) static void fill_result_struct_from_cubes(ei_impulse_result_t *result, std::vector<ei_classifier_cube_t*> *cubes, int out_width_factor, uint32_t object_detection_count) {
     std::vector<ei_classifier_cube_t*> bbs;
     static std::vector<ei_impulse_result_bounding_box_t> results;
     int added_boxes_count = 0;
@@ -151,9 +156,9 @@ __attribute__((unused)) static void fill_result_struct_from_cubes(ei_impulse_res
     }
 
     // if we didn't detect min required objects, fill the rest with fixed value
-    if(added_boxes_count < EI_CLASSIFIER_OBJECT_DETECTION_COUNT) {
-        results.resize(EI_CLASSIFIER_OBJECT_DETECTION_COUNT);
-        for (size_t ix = added_boxes_count; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+    if(added_boxes_count < object_detection_count) {
+        results.resize(object_detection_count);
+        for (size_t ix = added_boxes_count; ix < object_detection_count; ix++) {
             results[ix].value = 0.0f;
         }
     }
@@ -165,66 +170,70 @@ __attribute__((unused)) static void fill_result_struct_from_cubes(ei_impulse_res
     result->bounding_boxes = results.data();
     result->bounding_boxes_count = results.size();
 }
+#endif
 
-__attribute__((unused)) static void fill_result_struct_f32(ei_impulse_result_t *result, float *data, int out_width, int out_height) {
+__attribute__((unused)) static void fill_result_struct_f32_fomo(const ei_impulse_t *impulse, ei_impulse_result_t *result, float *data, int out_width, int out_height) {
+#ifdef EI_HAS_FOMO
     std::vector<ei_classifier_cube_t*> cubes;
 
-    int out_width_factor = EI_CLASSIFIER_INPUT_WIDTH / out_width;
+    int out_width_factor = impulse->input_width / out_width;
 
     for (size_t y = 0; y < out_width; y++) {
         // ei_printf("    [ ");
         for (size_t x = 0; x < out_height; x++) {
-            size_t loc = ((y * out_height) + x) * (EI_CLASSIFIER_LABEL_COUNT + 1);
+            size_t loc = ((y * out_height) + x) * (impulse->label_count + 1);
 
-            for (size_t ix = 1; ix < EI_CLASSIFIER_LABEL_COUNT + 1; ix++) {
+            for (size_t ix = 1; ix < impulse->label_count + 1; ix++) {
                 float vf = data[loc+ix];
 
-                ei_handle_cube(&cubes, x, y, vf, ei_classifier_inferencing_categories[ix - 1]);
+                ei_handle_cube(&cubes, x, y, vf, impulse->categories[ix - 1], impulse->object_detection_threshold);
             }
         }
     }
 
-    fill_result_struct_from_cubes(result, &cubes, out_width_factor);
+    fill_result_struct_from_cubes(result, &cubes, out_width_factor, impulse->object_detection_count);
+#endif
 }
 
-__attribute__((unused)) static void fill_result_struct_i8(ei_impulse_result_t *result, int8_t *data, float zero_point, float scale, int out_width, int out_height) {
+__attribute__((unused)) static void fill_result_struct_i8_fomo(const ei_impulse_t *impulse, ei_impulse_result_t *result, int8_t *data, float zero_point, float scale, int out_width, int out_height) {
+#ifdef EI_HAS_FOMO
     std::vector<ei_classifier_cube_t*> cubes;
 
-    int out_width_factor = EI_CLASSIFIER_INPUT_WIDTH / out_width;
+    int out_width_factor = impulse->input_width / out_width;
 
     for (size_t y = 0; y < out_width; y++) {
         // ei_printf("    [ ");
         for (size_t x = 0; x < out_height; x++) {
-            size_t loc = ((y * out_height) + x) * (EI_CLASSIFIER_LABEL_COUNT + 1);
+            size_t loc = ((y * out_height) + x) * (impulse->label_count + 1);
 
-            for (size_t ix = 1; ix < EI_CLASSIFIER_LABEL_COUNT + 1; ix++) {
+            for (size_t ix = 1; ix < impulse->label_count + 1; ix++) {
                 int8_t v = data[loc+ix];
                 float vf = static_cast<float>(v - zero_point) * scale;
 
-                ei_handle_cube(&cubes, x, y, vf, ei_classifier_inferencing_categories[ix - 1]);
+                ei_handle_cube(&cubes, x, y, vf, impulse->categories[ix - 1], impulse->object_detection_threshold);
             }
         }
     }
 
-    fill_result_struct_from_cubes(result, &cubes, out_width_factor);
+    fill_result_struct_from_cubes(result, &cubes, out_width_factor, impulse->object_detection_count);
+#endif
 }
-
-#elif EI_CLASSIFIER_OBJECT_DETECTION
 
 /**
  * Fill the result structure from an unquantized output tensor
  * (we don't support quantized here a.t.m.)
  */
-__attribute__((unused)) static void fill_result_struct_f32(ei_impulse_result_t *result, float *data, float *scores, float *labels, bool debug) {
+__attribute__((unused)) static void fill_result_struct_f32_object_detection(const ei_impulse_t *impulse, ei_impulse_result_t *result, float *data, float *scores, float *labels, bool debug) {
+#ifdef EI_HAS_SSD
     static std::vector<ei_impulse_result_bounding_box_t> results;
     results.clear();
-    results.resize(EI_CLASSIFIER_OBJECT_DETECTION_COUNT);
-    for (size_t ix = 0; ix < EI_CLASSIFIER_OBJECT_DETECTION_COUNT; ix++) {
+    results.resize(impulse->object_detection_count);
+    for (size_t ix = 0; ix < impulse->object_detection_count; ix++) {
 
         float score = scores[ix];
         float label = labels[ix];
 
-        if (score >= EI_CLASSIFIER_OBJECT_DETECTION_THRESHOLD) {
+        if (score >= impulse->object_detection_threshold) {
             float ystart = data[(ix * 4) + 0];
             float xstart = data[(ix * 4) + 1];
             float yend = data[(ix * 4) + 2];
@@ -242,15 +251,26 @@ __attribute__((unused)) static void fill_result_struct_f32(ei_impulse_result_t *
             if (yend < ystart) yend = ystart;
 
             if (debug) {
-                ei_printf("%s (%f): %f [ %f, %f, %f, %f ]\n",
-                    ei_classifier_inferencing_categories[(uint32_t)label], label, score, xstart, ystart, xend, yend);
+                ei_printf("%s (", impulse->categories[(uint32_t)label]);
+                ei_printf_float(label);
+                ei_printf("): ");
+                ei_printf_float(score);
+                ei_printf(" [ ");
+                ei_printf_float(xstart);
+                ei_printf(", ");
+                ei_printf_float(ystart);
+                ei_printf(", ");
+                ei_printf_float(xend);
+                ei_printf(", ");
+                ei_printf_float(yend);
+                ei_printf(" ]\n");
             }
 
-            results[ix].label = ei_classifier_inferencing_categories[(uint32_t)label];
-            results[ix].x = static_cast<uint32_t>(xstart * static_cast<float>(EI_CLASSIFIER_INPUT_WIDTH));
-            results[ix].y = static_cast<uint32_t>(ystart * static_cast<float>(EI_CLASSIFIER_INPUT_HEIGHT));
-            results[ix].width = static_cast<uint32_t>((xend - xstart) * static_cast<float>(EI_CLASSIFIER_INPUT_WIDTH));
-            results[ix].height = static_cast<uint32_t>((yend - ystart) * static_cast<float>(EI_CLASSIFIER_INPUT_HEIGHT));
+            results[ix].label = impulse->categories[(uint32_t)label];
+            results[ix].x = static_cast<uint32_t>(xstart * static_cast<float>(impulse->input_width));
+            results[ix].y = static_cast<uint32_t>(ystart * static_cast<float>(impulse->input_height));
+            results[ix].width = static_cast<uint32_t>((xend - xstart) * static_cast<float>(impulse->input_width));
+            results[ix].height = static_cast<uint32_t>((yend - ystart) * static_cast<float>(impulse->input_height));
             results[ix].value = score;
         }
         else {
@@ -259,23 +279,22 @@ __attribute__((unused)) static void fill_result_struct_f32(ei_impulse_result_t *
     }
     result->bounding_boxes = results.data();
     result->bounding_boxes_count = results.size();
+#endif
 }
-
-#else
 
 /**
  * Fill the result structure from a quantized output tensor
  */
-__attribute__((unused)) static void fill_result_struct_i8(ei_impulse_result_t *result, int8_t *data, float zero_point, float scale, bool debug) {
-    for (uint32_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+__attribute__((unused)) static void fill_result_struct_i8(const ei_impulse_t *impulse, ei_impulse_result_t *result, int8_t *data, float zero_point, float scale, bool debug) {
+    for (uint32_t ix = 0; ix < impulse->label_count; ix++) {
         float value = static_cast<float>(data[ix] - zero_point) * scale;
 
         if (debug) {
-            ei_printf("%s:\t", ei_classifier_inferencing_categories[ix]);
+            ei_printf("%s:\t", impulse->categories[ix]);
             ei_printf_float(value);
             ei_printf("\n");
         }
-        result->classification[ix].label = ei_classifier_inferencing_categories[ix];
+        result->classification[ix].label = impulse->categories[ix];
         result->classification[ix].value = value;
     }
 }
@@ -283,20 +302,84 @@ __attribute__((unused)) static void fill_result_struct_i8(ei_impulse_result_t *r
 /**
  * Fill the result structure from an unquantized output tensor
  */
-__attribute__((unused)) static void fill_result_struct_f32(ei_impulse_result_t *result, float *data, bool debug) {
-    for (uint32_t ix = 0; ix < EI_CLASSIFIER_LABEL_COUNT; ix++) {
+__attribute__((unused)) static void fill_result_struct_f32(const ei_impulse_t *impulse, ei_impulse_result_t *result, float *data, bool debug) {
+    for (uint32_t ix = 0; ix < impulse->label_count; ix++) {
         float value = data[ix];
 
         if (debug) {
-            ei_printf("%s:\t", ei_classifier_inferencing_categories[ix]);
+            ei_printf("%s:\t", impulse->categories[ix]);
             ei_printf_float(value);
             ei_printf("\n");
         }
-        result->classification[ix].label = ei_classifier_inferencing_categories[ix];
+        result->classification[ix].label = impulse->categories[ix];
         result->classification[ix].value = value;
     }
 }
 
-#endif // EI_CLASSIFIER_OBJECT_DETECTION
+/**
+  * Fill the result structure from an unquantized output tensor
+  * (we don't support quantized here a.t.m.)
+  */
+__attribute__((unused)) static void fill_result_struct_f32_yolov5(const ei_impulse_t *impulse, ei_impulse_result_t *result, float *data, size_t output_features_count) {
+#ifdef EI_HAS_YOLOV5
+    static std::vector<ei_impulse_result_bounding_box_t> results;
+    results.clear();
+
+    size_t col_size = 5 + impulse->label_count;
+    size_t row_count = output_features_count / col_size;
+
+    for (size_t ix = 0; ix < row_count; ix++) {
+        size_t base_ix = ix * col_size;
+        float xc = data[base_ix + 0];
+        float yc = data[base_ix + 1];
+        float w = data[base_ix + 2];
+        float h = data[base_ix + 3];
+        float x = xc - (w / 2.0f);
+        float y = yc - (h / 2.0f);
+        if (x < 0) {
+            x = 0;
+        }
+        if (y < 0) {
+            y = 0;
+        }
+        if (x + w > impulse->input_width) {
+            w = impulse->input_width - x;
+        }
+        if (y + h > impulse->input_height) {
+            h = impulse->input_height - y;
+        }
+
+        if (w < 0 || h < 0) {
+            continue;
+        }
+
+        float score = data[base_ix + 4];
+
+        uint32_t label = 0;
+        for (size_t lx = 0; lx < impulse->label_count; lx++) {
+            float l = data[base_ix + 5 + lx];
+            if (l > 0.5f) {
+                label = lx;
+                break;
+            }
+        }
+
+        if (score >= impulse->object_detection_threshold && score <= 1.0f) {
+            ei_impulse_result_bounding_box_t r;
+            r.label = ei_classifier_inferencing_categories[label];
+            r.x = static_cast<uint32_t>(x * static_cast<float>(impulse->input_width));
+            r.y = static_cast<uint32_t>(y * static_cast<float>(impulse->input_height));
+            r.width = static_cast<uint32_t>(w * static_cast<float>(impulse->input_width));
+            r.height = static_cast<uint32_t>(h * static_cast<float>(impulse->input_height));
+            r.value = score;
+            results.push_back(r);
+        }
+    }
+
+    result->bounding_boxes = results.data();
+    result->bounding_boxes_count = results.size();
+#endif
+}
+
 
 #endif // _EI_CLASSIFIER_FILL_RESULT_STRUCT_H_

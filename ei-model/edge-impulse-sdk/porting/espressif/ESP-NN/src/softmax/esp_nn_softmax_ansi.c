@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifdef EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
+
 #include "softmax_common.h"
 
 int32_t esp_nn_get_softmax_scratch_size_ansi(const int32_t width, const int32_t height)
@@ -86,4 +86,3 @@ void esp_nn_softmax_s8_ansi(const int8_t *input_data,
         out_ptr += width;
     }
 }
-#endif

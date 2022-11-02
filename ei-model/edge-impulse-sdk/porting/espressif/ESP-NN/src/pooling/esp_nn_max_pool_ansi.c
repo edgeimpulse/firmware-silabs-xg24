@@ -11,10 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifdef EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
-#include <stdint.h>
 
-#include <src/common/common_functions.h>
+#include <stdint.h>
+#include <edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h>
 
 void esp_nn_max_pool_s8_ansi(const int8_t *input,
                              const uint16_t input_wd,
@@ -64,4 +63,3 @@ void esp_nn_max_pool_s8_ansi(const int8_t *input,
         }
     }
 }
-#endif

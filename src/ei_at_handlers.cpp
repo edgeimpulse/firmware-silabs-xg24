@@ -243,7 +243,7 @@ bool at_sample_start(const char **argv, const int argc)
             return true;
         }
     }
-    
+
     if (ei_connect_fusion_list(argv[0], SENSOR_FORMAT)) {
         if (!ei_fusion_setup_data_sampling()) {
             ei_printf("ERR: Failed to start sensor fusion sampling\n");
@@ -410,12 +410,14 @@ bool at_get_config(void)
     ei_printf("\n");
     ei_printf("===== Inference ======\n");
     ei_printf("Sensor:           %d\r\n", EI_CLASSIFIER_SENSOR);
-#if EI_CLASSIFIER_OBJECT_DETECTION_CONSTRAINED == 1
+#if EI_CLASSIFIER_OBJECT_DETECTION
+    #if EI_CLASSIFIER_OBJECT_DETECTION_LAST_LAYER == EI_CLASSIFIER_LAST_LAYER_FOMO
         const char *model_type = "constrained_object_detection";
-#elif EI_CLASSIFIER_OBJECT_DETECTION
+    #else
         const char *model_type = "object_detection";
+    #endif
 #else
-        const char *model_type = "classification";
+    const char *model_type = "classification";
 #endif
     ei_printf("Model type:       %s\r\n", model_type);
     ei_printf("\n");
@@ -453,7 +455,7 @@ ATServer *ei_at_init(EiDeviceXG24 *device)
     dev = device;
 
     at = ATServer::get_instance();
-   
+
     at->register_command(AT_CONFIG, AT_CONFIG_HELP_TEXT, nullptr, at_get_config, nullptr, nullptr);
     at->register_command(AT_SAMPLESTART, AT_SAMPLESTART_HELP_TEXT, nullptr, nullptr, at_sample_start, AT_SAMPLESTART_ARGS);
     at->register_command(AT_READBUFFER, AT_READBUFFER_HELP_TEXT, nullptr, nullptr, at_read_buffer, AT_READBUFFER_ARGS);

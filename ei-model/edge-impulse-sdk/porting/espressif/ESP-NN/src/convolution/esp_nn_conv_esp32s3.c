@@ -11,11 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifdef EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
-#include <stdio.h>
-#include <esp_nn_defs.h>
 
-#include <src/common/common_functions.h>
+#include <stdio.h>
+#include <edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_defs.h>
+#include <edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h>
 
 static int16_t *scratch_buffer = NULL;
 
@@ -461,4 +460,3 @@ void esp_nn_conv_s8_esp32s3(const data_dims_t *input_dims,
                                 bias, output_dims, out_data, conv_params, quant_data);
     }
 }
-#endif

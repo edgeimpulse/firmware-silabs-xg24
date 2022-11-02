@@ -11,10 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifdef EI_CLASSIFIER_TFLITE_ENABLE_ESP_NN
-#include <esp_nn_defs.h>
 
-#include <src/common/common_functions.h>
+#include <edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_defs.h>
+#include <edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h>
 
 int esp_nn_get_conv_scratch_size_opt(const data_dims_t *input_dims,
                                      const data_dims_t *filter_dims,
@@ -177,4 +176,3 @@ void esp_nn_conv_s8_opt(const data_dims_t *input_dims,
         }
     }
 }
-#endif
