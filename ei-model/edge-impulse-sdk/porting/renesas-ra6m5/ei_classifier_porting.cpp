@@ -53,8 +53,15 @@ uint64_t ei_read_timer_ms() {
 }
 
 uint64_t ei_read_timer_us() {
-    
+
     return timer_get_ms()*1000;
+}
+
+__attribute__((weak)) char ei_getchar()
+{
+    // dummy implementation
+    char ch = 0;
+    return ch;
 }
 
 __attribute__((weak)) void ei_printf(const char *format, ...) {
@@ -69,7 +76,7 @@ __attribute__((weak)) void ei_printf(const char *format, ...) {
     if (length > 0){
         uart_print_user_msg((uint8_t *)buffer);
     }
-    
+
 }
 
 __attribute__((weak)) void ei_printf_float(float f) {
@@ -115,6 +122,15 @@ __attribute__((weak)) void ei_printf_float(float f) {
     }
 
     ei_printf("%s", s);
+}
+
+/**
+ *
+ * @param c
+ */
+void ei_putchar(char c)
+{
+    ei_printf("%c", c);
 }
 
 __attribute__((weak)) void *ei_malloc(size_t size) {

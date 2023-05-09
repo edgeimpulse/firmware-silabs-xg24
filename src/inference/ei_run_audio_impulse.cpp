@@ -166,7 +166,7 @@ void ei_start_impulse(bool continuous, bool debug, bool use_max_uart_speed)
     }
 
     if (ei_microphone_inference_start(continuous_mode ? EI_CLASSIFIER_SLICE_SIZE : EI_CLASSIFIER_RAW_SAMPLE_COUNT, EI_CLASSIFIER_INTERVAL_MS) == false) {
-        ei_printf("ERR: Failed to setup audio sampling");
+        ei_printf("ERR: Could not allocate audio buffer (size %d), this could be due to the window length of your model\r\n", EI_CLASSIFIER_RAW_SAMPLE_COUNT);
         return;
     }
 }

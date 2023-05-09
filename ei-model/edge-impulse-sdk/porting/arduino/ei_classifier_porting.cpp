@@ -46,9 +46,18 @@ void ei_serial_set_baudrate(int baudrate)
 
 }
 
-void ei_putchar(char c)
+EI_WEAK_FN void ei_putchar(char c)
 {
     Serial.write(c);
+}
+
+EI_WEAK_FN char ei_getchar()
+{
+    char ch = 0;
+    if (Serial.available() > 0) {
+	    ch = Serial.read();
+    }
+    return ch;
 }
 
 /**

@@ -43,12 +43,6 @@
 #include "sensors/ei_camera_arducam.h"
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
 
-//TODO: only for compatibility with ei_image_lib, remove after upgrading fw-sdk
-void ei_putc(char c)
-{
-    sl_putchar(c);
-}
-
 int main(void)
 {
   char c;

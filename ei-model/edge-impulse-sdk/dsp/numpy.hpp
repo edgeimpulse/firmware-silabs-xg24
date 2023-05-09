@@ -2363,7 +2363,7 @@ public:
         // init the output to zeros
         memset(output, 0, sizeof(float) * (stop_bin - start_bin));
         int input_ix = 0;
-        while (input_ix < input_size) {
+        while (input_ix < (int)input_size) {
             // Figure out if we need any zero padding
             size_t n_input_points = input_ix + fft_points <= input_size ? fft_points
                                                                         : input_size - input_ix;
@@ -2399,7 +2399,21 @@ public:
     {
         // Use CMSIS either way.  Will fall back to straight C when needed
         float temp;
+#if EIDSP_USE_CMSIS_DSP
         arm_var_f32(input, size, &temp);
+#else
+        float mean = 0.0f;
+        for (size_t i = 0; i < size; i++) {
+            mean += input[i];
+        }
+        mean /= size;
+
+        temp = 0.0f;
+        for (size_t i = 0; i < size; i++) {
+            temp += (input[i] - mean) * (input[i] - mean);
+        }
+        temp /= (size - 1);
+#endif
         return temp;
     }
 

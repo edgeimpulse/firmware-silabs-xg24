@@ -10,6 +10,7 @@ quality: production
 source:
 - {path: firmware-sdk/at-server/ei_at_parser.cpp, folder: firmware-sdk/at-server}
 - {path: firmware-sdk/at-server/ei_at_server.cpp, folder: firmware-sdk/at-server}
+- {path: firmware-sdk/at-server/ei_at_command_set.cpp, folder: firmware-sdk/at-server}
 - {path: firmware-sdk/at-server/ei_at_server_singleton.cpp, folder: firmware-sdk/at-server}
 - {path: firmware-sdk/jpeg/JPEGENC.cpp, folder: firmware-sdk/jpeg}
 - {path: firmware-sdk/at_base64_lib.cpp, folder: firmware-sdk}

@@ -80,15 +80,7 @@ then
         echo "Firmware SDK not found."
         exit 1
     fi
-    # if there is no Makefile, then recreate the project
-    if [ ! -f ${PROJECT_NAME}.Makefile ];
-    then
-        if [ $? -ne 0 ]; then
-            echo "Failed to create SLCC component file."
-            exit 1
-        fi
-        ${SLC_BIN} generate ${PROJECT_FILE} -cp -np --toolchain=gcc --output-type=makefile
-    fi
+    ${SLC_BIN} generate ${PROJECT_FILE} --no-copy --toolchain=gcc --output-type=makefile
     make -j -f ${PROJECT_NAME}.Makefile
 fi
 

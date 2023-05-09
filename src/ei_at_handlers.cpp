@@ -28,11 +28,31 @@
 #include "firmware-sdk/at_base64_lib.h"
 #include "firmware-sdk/ei_image_lib.h"
 #include "firmware-sdk/ei_device_lib.h"
+#include "firmware-sdk/ei_device_interface.h"
 #include "inference/ei_run_impulse.h"
 #include "model-parameters/model_metadata.h"
 #include "sensors/ei_camera_arducam.h"
 #include <string>
 using namespace std;
+
+#define TRANSFER_BUF_LEN 32
+
+// Helper functions
+
+void at_error_not_implemented()
+{
+    ei_printf("Command not implemented\r\n");
+}
+
+inline bool check_args_num(const int &required, const int &received)
+{
+    if (received < required) {
+        ei_printf("Too few arguments! Required: %d\n", required);
+        return false;
+    }
+
+    return true;
+}
 
 EiDeviceXG24 *dev;
 
@@ -287,6 +307,21 @@ bool at_run_impulse_cont(void)
     return false;
 }
 
+bool at_run_impulse_static_data(const char **argv, const int argc)
+{
+
+    if (check_args_num(2, argc) == false) {
+        return false;
+    }
+
+    bool debug = (argv[0][0] == 'y');
+    size_t length = (size_t)atoi(argv[1]);
+
+    bool res = run_impulse_static_data(debug, length, TRANSFER_BUF_LEN);
+
+    return res;
+}
+
 bool at_stop_impulse(void)
 {
     ei_stop_impulse();
@@ -470,6 +505,7 @@ ATServer *ei_at_init(EiDeviceXG24 *device)
     at->register_command(AT_RUNIMPULSE, AT_RUNIMPULSE_HELP_TEXT, at_run_impulse, nullptr, nullptr, nullptr);
     at->register_command(AT_RUNIMPULSEDEBUG, AT_RUNIMPULSEDEBUG_HELP_TEXT, nullptr, nullptr, at_run_impulse_debug, AT_RUNIMPULSEDEBUG_ARGS);
     at->register_command(AT_RUNIMPULSECONT, AT_RUNIMPULSECONT_HELP_TEXT, at_run_impulse_cont, nullptr, nullptr, nullptr);
+    at->register_command(AT_RUNIMPULSESTATIC, AT_RUNIMPULSESTATIC_HELP_TEXT, nullptr, nullptr, at_run_impulse_static_data, AT_RUNIMPULSESTATIC_ARGS);
     at->register_command(AT_SNAPSHOT, AT_SNAPSHOT_HELP_TEXT, nullptr, at_get_snapshot, at_take_snapshot, AT_SNAPSHOT_ARGS);
     at->register_command(AT_SNAPSHOTSTREAM, AT_SNAPSHOTSTREAM_HELP_TEXT, nullptr, nullptr, at_snapshot_stream, AT_SNAPSHOTSTREAM_ARGS);
     at->register_command("STOPIMPULSE", "", at_stop_impulse, nullptr, nullptr, nullptr);

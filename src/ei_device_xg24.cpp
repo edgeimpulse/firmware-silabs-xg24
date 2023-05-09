@@ -36,7 +36,7 @@ extern "C" {
 };
 //TODO: move out of device and register through EiDevice API
 #include "sensors/ei_microphone.h"
-#include "sensors/ei_inertial_sensor.h"
+// #include "sensors/ei_inertial_sensor.h"
 #include "sensors/ei_camera_arducam.h"
 
 static const sl_led_t *led_red = &sl_led_led0;
@@ -45,10 +45,36 @@ static const sl_led_t *led_blue = &sl_led_led2;
 
 using namespace std;
 
+static uint32_t calc_best_timer(uint32_t time1, uint32_t time2);
+
 static void on_sample_timer(sl_sleeptimer_timer_handle_t *handle, void *data)
 {
     EiDeviceXG24* dev = static_cast<EiDeviceXG24*>(data);
+
+#if MULTI_FREQ_ENABLED == 1
+    if (dev->get_fusioning() == 1){
+        dev->sample_read_callback();
+    }
+    else {
+        uint8_t flag = 0;
+        uint8_t i = 0;
+        dev->actual_timer += dev->get_sample_interval();
+
+        for (i = 0; i < dev->get_fusioning(); i++){
+            if (((uint32_t)(dev->actual_timer % (uint32_t)dev->multi_sample_interval.at(i))) == 0) {
+                flag |= (1<<i);
+            }
+        }
+        if (dev->sample_multi_read_callback != nullptr)
+        {
+            dev->sample_multi_read_callback(flag);
+
+        }
+    }
+#else
     dev->sample_read_callback();
+#endif
+
 }
 
 static void on_led_timer(sl_sleeptimer_timer_handle_t *handle, void *data)
@@ -215,8 +241,11 @@ void EiDeviceXG24::clear_config(void)
 bool EiDeviceXG24::start_sample_thread(void (*sample_read_cb)(void), float sample_interval_ms)
 {
     sl_status_t ret;
-
     this->sample_read_callback = sample_read_cb;
+
+#if MULTI_FREQ_ENABLED == 1
+    this->fusioning = 1;
+#endif
     ret = sl_sleeptimer_start_periodic_timer_ms(&this->sample_timer,
                                           sample_interval_ms,
                                           on_sample_timer,
@@ -226,6 +255,52 @@ bool EiDeviceXG24::start_sample_thread(void (*sample_read_cb)(void), float sampl
 
     return ret == SL_STATUS_OK;
 }
+
+#if MULTI_FREQ_ENABLED == 1
+/**
+ *
+ * @param sample_multi_read_cb
+ * @param multi_sample_interval_ms
+ * @param num_fusioned
+ * @return
+ */
+bool EiDeviceXG24::start_multi_sample_thread(void (*sample_multi_read_cb)(uint8_t), float* multi_sample_interval_ms, uint8_t num_fusioned)
+{
+  sl_status_t ret;
+
+  uint8_t i;
+  uint8_t flag = 0;
+
+  this->sample_multi_read_callback = sample_multi_read_cb;
+  this->fusioning = num_fusioned;
+  this->multi_sample_interval.clear();
+
+  this->sample_multi_read_callback = sample_multi_read_cb;
+
+  for (i = 0; i < num_fusioned; i++){
+    this->multi_sample_interval.push_back(1.f/multi_sample_interval_ms[i]*1000.f);
+  }
+  /* to improve, we consider just a 2 sensors case for now */
+  this->sample_interval = ei_fusion_calc_multi_gcd(this->multi_sample_interval.data(), this->fusioning);
+
+      /* force first reading */
+  for (i = 0; i < this->fusioning; i++){
+    flag |= (1<<i);
+  }
+  this->sample_multi_read_callback(flag);
+
+  this->actual_timer = 0;
+
+  ret = sl_sleeptimer_start_periodic_timer_ms(&this->sample_timer,
+                                              this->sample_interval,
+                                        on_sample_timer,
+                                        this,
+                                        0,
+                                        SL_SLEEPTIMER_NO_HIGH_PRECISION_HF_CLOCKS_REQUIRED_FLAG);
+
+  return ret == SL_STATUS_OK;
+}
+#endif
 
 bool EiDeviceXG24::stop_sample_thread(void)
 {
@@ -330,4 +405,30 @@ EiSnapshotProperties EiDeviceXG24::get_snapshot_list(void)
 uint32_t EiDeviceXG24::get_data_output_baudrate(void)
 {
     return 115200;
+}
+
+/**
+ *
+ * @param freq1
+ * @param freq2
+ * @return
+ */
+static uint32_t calc_best_timer(uint32_t time1, uint32_t time2)
+{
+    uint32_t temp = 1;
+
+    if (time2 > time1){
+        temp = time2;
+        time2 = time1;
+        time1 = temp;
+    }
+
+    while(time2 != 0){
+        temp = time1 % time2;
+        time1 = time2;
+        time2 = temp;
+    }
+
+
+    return time1;
 }

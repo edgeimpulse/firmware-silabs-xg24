@@ -21,16 +21,13 @@
 #if (EI_CLASSIFIER_INFERENCING_ENGINE == EI_CLASSIFIER_TENSORRT)
 
 #include "model-parameters/model_metadata.h"
-#if EI_CLASSIFIER_HAS_MODEL_VARIABLES == 1
-#include "model-parameters/model_variables.h"
-#endif
 
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
-#include "model-parameters/dsp_blocks.h"
 #include "edge-impulse-sdk/classifier/ei_fill_result_struct.h"
 
 #include <stdlib.h>
 #include "tflite/linux-jetson-nano/libeitrt.h"
+
 EiTrt *ei_trt_handle = NULL;
 
 inline bool file_exists(char *model_file_name)
@@ -57,8 +54,11 @@ EI_IMPULSE_ERROR run_nn_inference(
     const ei_impulse_t *impulse,
     ei::matrix_t *fmatrix,
     ei_impulse_result_t *result,
+    void *config_ptr,
     bool debug = false)
 {
+    ei_learning_block_config_tflite_graph_t *block_config = (ei_learning_block_config_tflite_graph_t*)config_ptr;
+    ei_config_tflite_graph_t *graph_config = (ei_config_tflite_graph_t*)block_config->graph_config;
 
     #if EI_CLASSIFIER_TFLITE_INPUT_QUANTIZED == 1
     #error "TensorRT requires an unquantized network"
@@ -83,7 +83,7 @@ EI_IMPULSE_ERROR run_nn_inference(
             return EI_IMPULSE_TENSORRT_INIT_FAILED;
         }
 
-        if (fwrite(impulse->model_arr, impulse->model_arr_size, 1, file) != 1) {
+        if (fwrite(graph_config->model, graph_config->model_size, 1, file) != 1) {
             ei_printf("ERR: TensorRT init fwrite failed.\n");
             return EI_IMPULSE_TENSORRT_INIT_FAILED;
         }
@@ -94,7 +94,40 @@ EI_IMPULSE_ERROR run_nn_inference(
         }
     }
 
-    float out_data[impulse->tflite_output_features_count];
+    uint32_t out_data_size = 0;
+
+    if (impulse->object_detection) {
+        switch (impulse->object_detection_last_layer) {
+            case EI_CLASSIFIER_LAST_LAYER_FOMO: {
+                out_data_size = impulse->tflite_output_features_count;
+                break;
+            }
+            case EI_CLASSIFIER_LAST_LAYER_SSD: {
+                ei_printf("ERR: SSD models are not supported using TensorRT \n");
+                return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;
+                break;
+            }
+            case EI_CLASSIFIER_LAST_LAYER_YOLOV5:
+            case EI_CLASSIFIER_LAST_LAYER_YOLOV5_V5_DRPAI: {
+                ei_printf("ERR: YOLOv5 models are not supported using TensorRT \n");
+                return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;
+            }
+            default: {
+                ei_printf(
+                    "ERR: Unsupported object detection last layer (%d)\n",
+                    impulse->object_detection_last_layer);
+                return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;
+            }
+        }
+    }
+    else {
+        out_data_size = impulse->label_count;
+    }
+
+    float *out_data = (float*)ei_malloc(out_data_size * sizeof(float));
+    if (out_data == nullptr) {
+        ei_printf("ERR: Cannot allocate memory for output data \n");
+    }
 
     // lazy initialize tensorRT context
     if (ei_trt_handle == nullptr) {
@@ -103,22 +136,24 @@ EI_IMPULSE_ERROR run_nn_inference(
 
     uint64_t ctx_start_us = ei_read_timer_us();
 
-    libeitrt::infer(ei_trt_handle, fmatrix->buffer, out_data, impulse->tflite_output_features_count);
+    libeitrt::infer(ei_trt_handle, fmatrix->buffer, out_data, out_data_size);
 
     uint64_t ctx_end_us = ei_read_timer_us();
 
     result->timing.classification_us = ctx_end_us - ctx_start_us;
     result->timing.classification = (int)(result->timing.classification_us / 1000);
 
+    EI_IMPULSE_ERROR fill_res = EI_IMPULSE_OK;
+
     if (impulse->object_detection) {
         switch (impulse->object_detection_last_layer) {
         case EI_CLASSIFIER_LAST_LAYER_FOMO: {
-            fill_result_struct_f32_fomo(
+            fill_res = fill_result_struct_f32_fomo(
                 impulse,
                 result,
                 out_data,
-                impulse->input_width / 8,
-                impulse->input_height / 8);
+                impulse->fomo_output_size,
+                impulse->fomo_output_size);
             break;
         }
         case EI_CLASSIFIER_LAST_LAYER_SSD: {
@@ -126,7 +161,8 @@ EI_IMPULSE_ERROR run_nn_inference(
             return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;
             break;
         }
-        case EI_CLASSIFIER_LAST_LAYER_YOLOV5: {
+        case EI_CLASSIFIER_LAST_LAYER_YOLOV5:
+        case EI_CLASSIFIER_LAST_LAYER_YOLOV5_V5_DRPAI: {
             ei_printf("ERR: YOLOv5 models are not supported using TensorRT \n");
             return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;
         }
@@ -139,7 +175,13 @@ EI_IMPULSE_ERROR run_nn_inference(
         }
     }
     else {
-        fill_result_struct_f32(impulse, result, out_data, debug);
+        fill_res = fill_result_struct_f32(impulse, result, out_data, debug);
+    }
+
+    ei_free(out_data);
+
+    if (fill_res != EI_IMPULSE_OK) {
+        return fill_res;
     }
 
     return EI_IMPULSE_OK;
@@ -151,9 +193,10 @@ EI_IMPULSE_ERROR run_nn_inference(
  * returns EI_IMPULSE_OK.
  */
 EI_IMPULSE_ERROR run_nn_inference_image_quantized(
-    ei_impulse_t *impulse,
+    const ei_impulse_t *impulse,
     signal_t *signal,
     ei_impulse_result_t *result,
+    void *config_ptr,
     bool debug = false)
 {
     return EI_IMPULSE_UNSUPPORTED_INFERENCING_ENGINE;

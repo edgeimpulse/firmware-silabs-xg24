@@ -19,13 +19,18 @@
 #if EI_PORTING_ZEPHYR == 1
 
 #include <version.h>
-#if (KERNEL_VERSION_MAJOR > 3) || ((KERNEL_VERSION_MAJOR == 3) && (KERNEL_VERSION_MINOR > 0))
+// Zpehyr 3.1.x and newer uses different include scheme
+#if (KERNEL_VERSION_MAJOR > 3) || ((KERNEL_VERSION_MAJOR == 3) && (KERNEL_VERSION_MINOR >= 1))
 #include <zephyr/kernel.h>
+#include <zephyr/drivers/uart.h>
 #else
 #include <zephyr.h>
+#include <drivers/uart.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+
+extern const struct device *uart;
 
 #define EI_WEAK_FN __attribute__((weak))
 
@@ -46,6 +51,17 @@ uint64_t ei_read_timer_us() {
     return k_uptime_get() * 1000;
 }
 
+EI_WEAK_FN char ei_getchar()
+{
+    uint8_t rcv_char = 0;
+    if(uart_fifo_read(uart, &rcv_char, 1) == 1) {
+        return rcv_char;
+    }
+    else {
+        return 0;
+    }
+}
+
 /**
  *  Printf function uses vsnprintf and output using Arduino Serial
  */
@@ -57,7 +73,7 @@ __attribute__((weak)) void ei_printf(const char *format, ...) {
     int r = vsnprintf(print_buf, sizeof(print_buf), format, args);
     va_end(args);
 
-    if (r > 0) {
+    if(r > 0) {
         printf("%s", print_buf);
     }
 }

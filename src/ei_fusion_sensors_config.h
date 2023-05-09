@@ -29,4 +29,6 @@
 /** Format used for fusion */
 typedef float fusion_sample_format_t;
 
+#define MULTI_FREQ_ENABLED      1
+
 #endif // EI_FUSION_SENSORS_CONFIG_H

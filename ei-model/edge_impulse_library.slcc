@@ -24,7 +24,6 @@ define:
 include:
   - path: .
     file_list:
-      - path: edge-impulse-sdk/anomaly/anomaly.h
       - path: edge-impulse-sdk/CMSIS/Core/Include/cachel1_armv7.h
       - path: edge-impulse-sdk/CMSIS/Core/Include/core_cm7.h
       - path: edge-impulse-sdk/CMSIS/Core/Include/tz_context.h
@@ -107,13 +106,20 @@ include:
       - path: edge-impulse-sdk/classifier/ei_performance_calibration.h
       - path: edge-impulse-sdk/classifier/ei_aligned_malloc.h
       - path: edge-impulse-sdk/classifier/ei_run_dsp.h
+      - path: edge-impulse-sdk/classifier/ei_nms.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/anomaly.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/onnx_tidl.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/akida.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/drpai.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tensorrt.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_tidl.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_eon.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_full.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_helper.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tflite_micro.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tensaiflow.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/memryx.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/engines.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier_c.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier.h
       - path: edge-impulse-sdk/classifier/ei_run_classifier_image.h
@@ -193,6 +199,7 @@ include:
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/cppmath.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/quantization_util.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/common.h
+      - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/tensor_utils_common.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/optimized/neon_check.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/max.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/strided_slice_logic.h
@@ -244,6 +251,8 @@ include:
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/neg.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/comparisons.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/transpose_conv.h
+      - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/batch_matmul.h
+      - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/transpose.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/conv.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/floor.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/binary_function.h
@@ -266,9 +275,12 @@ include:
       - path: edge-impulse-sdk/dsp/ei_utils.h
       - path: edge-impulse-sdk/dsp/spectral/filters.hpp
       - path: edge-impulse-sdk/dsp/spectral/feature.hpp
+      - path: edge-impulse-sdk/dsp/spectral/wavelet.hpp
+      - path: edge-impulse-sdk/dsp/spectral/signal.hpp
       - path: edge-impulse-sdk/dsp/spectral/spectral.hpp
       - path: edge-impulse-sdk/dsp/spectral/fir_filter.hpp
       - path: edge-impulse-sdk/dsp/spectral/processing.hpp
+      - path: edge-impulse-sdk/dsp/spectral/wavelet_coeff.hpp
       - path: edge-impulse-sdk/dsp/kissfft/_kiss_fft_guts.h
       - path: edge-impulse-sdk/dsp/kissfft/kiss_fft.h
       - path: edge-impulse-sdk/dsp/kissfft/kissfft.h
@@ -301,11 +313,10 @@ include:
       - path: edge-impulse-sdk/porting/espressif/ESP-NN/include/esp_nn_ansi_c.h
       - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/common/common_functions.h
       - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/softmax/softmax_common.h
-      - path: model-parameters/dsp_blocks.h
       - path: model-parameters/anomaly_clusters.h
       - path: model-parameters/model_variables.h
-      - path: model-parameters/anomaly_types.h
       - path: model-parameters/model_metadata.h
+      - path: tflite-model/trained_model_ops_define.h
       - path: tflite-model/trained_model_compiled.h
 source:
   - path: edge-impulse-sdk/cmake/utils.cmake
@@ -873,6 +884,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/strided_slice.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/prelu.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/split.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/transpose.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/scratch_buf_mgr.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/expand_dims.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/transpose_conv.cc
@@ -893,6 +905,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/activations.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/logistic.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/softmax_common.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/squared_difference.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/quantize_common.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/ceil.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/add_n.cc
@@ -910,6 +923,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/pack.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/mli_slicers.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/split_v.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/batch_matmul.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/slice.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/fill.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/leaky_relu.cc
@@ -920,7 +934,6 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/logical.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/scratch_buffers.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/tanh.cc
-  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/tflite_detection_postprocess.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/l2norm.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/neg.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/kernel_runner.cc
@@ -933,6 +946,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/micro_error_reporter.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/recording_micro_allocator.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/micro_string.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/tensor_utils_common.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/micro_interpreter.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/memory_planner/greedy_memory_planner.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/memory_planner/linear_memory_planner.cc
@@ -963,6 +977,8 @@ source:
   - path: edge-impulse-sdk/porting/raspberry/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/renesas-ra6m5/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/renesas-ra6m5/debug_log.cpp
+  - path: edge-impulse-sdk/porting/brickml/ei_classifier_porting.cpp
+  - path: edge-impulse-sdk/porting/brickml/debug_log.cpp
   - path: edge-impulse-sdk/porting/himax/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/himax/debug_log.cpp
   - path: edge-impulse-sdk/porting/infineon-psoc62/ei_classifier_porting.cpp

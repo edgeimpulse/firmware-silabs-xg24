@@ -28,6 +28,7 @@
 #include "firmware-sdk/ei_device_info_lib.h"
 #include "firmware-sdk/ei_device_memory.h"
 #include "sensors/ei_camera_arducam.h"
+#include "ei_fusion_sensors_config.h"
 
 class EiDeviceXG24 : public EiDeviceInfo {
 private:
@@ -62,6 +63,11 @@ public:
     bool get_sensor_list(const ei_device_sensor_t **sensor_list, size_t *sensor_list_size) override;
     EiSnapshotProperties get_snapshot_list(void);
     uint32_t get_data_output_baudrate(void) override;
+
+#if MULTI_FREQ_ENABLED == 1
+    bool start_multi_sample_thread(void (*sample_multi_read_cb)(uint8_t), float* multi_sample_interval_ms, uint8_t num_fusioned) override;
+    void (*sample_multi_read_callback)(uint8_t);
+#endif
 };
 
 #endif /* EI_DEVICE_XG24_H */
