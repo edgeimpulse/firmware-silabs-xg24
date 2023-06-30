@@ -125,6 +125,7 @@ include:
       - path: edge-impulse-sdk/classifier/ei_run_classifier_image.h
       - path: edge-impulse-sdk/classifier/ei_classifier_config.h
       - path: edge-impulse-sdk/classifier/ei_classifier_types.h
+      - path: edge-impulse-sdk/classifier/ei_quantize.h
       - path: edge-impulse-sdk/classifier/ei_signal_with_range.h
       - path: edge-impulse-sdk/classifier/ei_fill_result_struct.h
       - path: edge-impulse-sdk/classifier/ei_model_types.h
@@ -160,6 +161,7 @@ include:
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/mli_tf_utils.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/micro_utils.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/scratch_buffers.h
+      - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/tree_ensemble_classifier.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/circular_buffer_flexbuffers_generated_data.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/mli_slicers.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/kernel_util.h
@@ -191,6 +193,7 @@ include:
       - path: edge-impulse-sdk/tensorflow/lite/micro/memory_helpers.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/all_ops_resolver.h
       - path: edge-impulse-sdk/tensorflow/lite/micro/recording_micro_interpreter.h
+      - path: edge-impulse-sdk/tensorflow/lite/kernels/tree_ensemble_classifier.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/kernel_util.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/compatibility.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/portable_tensor.h
@@ -231,6 +234,7 @@ include:
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/pad.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/add.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/l2normalization.h
+      - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/log_softmax.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/arg_min_max.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/ceil.h
       - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/hard_swish.h
@@ -893,6 +897,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/pad.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/mul.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/dequantize.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/tree_ensemble_classifier.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/unpack.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/arg_min_max.cc
@@ -914,6 +919,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/pooling.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/real.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/floor.cc
+  - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/log_softmax.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/cast.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/complex_abs.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/kernels/svdf.cc
@@ -957,6 +963,7 @@ source:
   - path: edge-impulse-sdk/tensorflow/lite/micro/micro_allocator.cc
   - path: edge-impulse-sdk/tensorflow/lite/micro/memory_helpers.cc
   - path: edge-impulse-sdk/tensorflow/lite/kernels/kernel_util_lite.cc
+  - path: edge-impulse-sdk/tensorflow/lite/kernels/tree_ensemble_classifier.cc
   - path: edge-impulse-sdk/tensorflow/lite/kernels/internal/quantization_util.cc
   - path: edge-impulse-sdk/tensorflow/lite/core/api/error_reporter.cc
   - path: edge-impulse-sdk/tensorflow/lite/core/api/tensor_utils.cc
@@ -1000,6 +1007,8 @@ source:
   - path: edge-impulse-sdk/porting/mingw32/debug_log.cpp
   - path: edge-impulse-sdk/porting/silabs/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/silabs/debug_log.cpp
+  - path: edge-impulse-sdk/porting/particle/ei_classifier_porting.cpp
+  - path: edge-impulse-sdk/porting/particle/debug_log.cpp
   - path: edge-impulse-sdk/porting/espressif/ei_classifier_porting.cpp
   - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/pooling/esp_nn_avg_pool_ansi.c
   - path: edge-impulse-sdk/porting/espressif/ESP-NN/src/pooling/esp_nn_max_pool_ansi.c

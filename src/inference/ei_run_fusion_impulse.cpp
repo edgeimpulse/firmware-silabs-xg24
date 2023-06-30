@@ -111,6 +111,7 @@ void ei_run_impulse(void)
             state = INFERENCE_SAMPLING;
             ei_fusion_sample_start(&samples_callback, EI_CLASSIFIER_INTERVAL_MS);
             dev->set_state(eiStateSampling);
+            ei_printf("Sampling...\n");
             return;
         case INFERENCE_SAMPLING:
             // wait for data to be collected through callback

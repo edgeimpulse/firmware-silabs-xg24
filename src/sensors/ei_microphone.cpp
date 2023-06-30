@@ -370,6 +370,8 @@ bool ei_microphone_inference_start(uint32_t n_samples, float interval_ms)
     sample_buffer = (microphone_sample_t*)ei_malloc(MIC_SAMPLE_SIZE * sizeof(microphone_sample_t) * 2);
     if(sample_buffer == nullptr) {
         ei_printf("ERR: Failed to allocate audio buffer\n");
+        ei_free(inference.buffers[0]);
+        ei_free(inference.buffers[1]);
         return false;
     }
 

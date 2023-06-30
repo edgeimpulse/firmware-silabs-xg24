@@ -75,7 +75,8 @@ void ei_run_impulse(void)
             state = INFERENCE_SAMPLING;
             dev->set_state(eiStateSampling);
             ei_microphone_inference_reset_buffers();
-            break;
+            ei_printf("Sampling...\n");
+            return;
         case INFERENCE_SAMPLING:
             // wait for data to be collected through callback
             if (ei_microphone_inference_is_recording()) {
