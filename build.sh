@@ -23,7 +23,10 @@
 
 set -e
 
-PROJECT_FILE=firmware-xg24.slcp
+SLCP_FILES=(*.slcp)
+PROJECT_FILE=${SLCP_FILES[0]}
+
+echo "Using project file: ${PROJECT_FILE}"
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 PROJECT_NAME=$(grep project_name ${PROJECT_FILE} | cut -d':' -f2 | xargs)
@@ -63,6 +66,7 @@ then
     rm -rf autogen/
     rm -rf build/
     rm -rf gecko_sdk_?.?.?/
+    rm -rf edge_impulse_extension_?.?.?/
     rm -f ${PROJECT_NAME}.Makefile
     rm -f ${PROJECT_NAME}.project.mak
     rm -f ${PROJECT_NAME}.slps
@@ -81,7 +85,7 @@ then
         exit 1
     fi
     ${SLC_BIN} generate ${PROJECT_FILE} --no-copy --toolchain=gcc --output-type=makefile
-    make -j -f ${PROJECT_NAME}.Makefile
+    make -j4 -f ${PROJECT_NAME}.Makefile
 fi
 
 if [ ! -z ${FLASH} ];
