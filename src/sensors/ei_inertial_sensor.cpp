@@ -26,7 +26,7 @@
 #include "ei_sampler.h"
 #include "ei_device_xg24.h"
 #include "edge-impulse-sdk/porting/ei_classifier_porting.h"
-#include "firmware-sdk/sensor_aq.h"
+#include "firmware-sdk/sensor-aq/sensor_aq.h"
 #include "sl_imu.h"
 
 /* Constant defines -------------------------------------------------------- */

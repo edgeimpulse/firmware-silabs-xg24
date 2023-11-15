@@ -12,6 +12,10 @@ source:
 - {path: firmware-sdk/at-server/ei_at_server.cpp}
 - {path: firmware-sdk/at-server/ei_at_command_set.cpp}
 - {path: firmware-sdk/at-server/ei_at_server_singleton.cpp}
+- {path: firmware-sdk/QCBOR/src/UsefulBuf.c}
+- {path: firmware-sdk/QCBOR/src/ieee754.c}
+- {path: firmware-sdk/QCBOR/src/qcbor_decode.c}
+- {path: firmware-sdk/QCBOR/src/qcbor_encode.c}
 - {path: firmware-sdk/jpeg/JPEGENC.cpp}
 - {path: firmware-sdk/at_base64_lib.cpp}
 - {path: firmware-sdk/ei_device_lib.cpp}
@@ -31,11 +35,6 @@ source:
 - {path: src/inference/ei_run_fusion_impulse.cpp}
 - {path: src/libs/jpegdec/jpegdec.cpp}
 - {path: src/libs/jpegdec/picojpeg.c}
-- {path: src/libs/QCBOR/src/ieee754.c}
-- {path: src/libs/QCBOR/src/ieee754.h}
-- {path: src/libs/QCBOR/src/qcbor_decode.c}
-- {path: src/libs/QCBOR/src/qcbor_encode.c}
-- {path: src/libs/QCBOR/src/UsefulBuf.c}
 - {path: src/libs/sensor_aq_mbedtls/sensor_aq_mbedtls_hs256.cpp}
 - {path: src/sensors/ei_camera_arducam.cpp}
 - {path: src/sensors/ei_environment_sensor.cpp}
@@ -54,6 +53,11 @@ include:
   - {path: firmware-sdk/jpeg/encode_as_jpg.h}
   - {path: firmware-sdk/jpeg/jpeg.h}
   - {path: firmware-sdk/jpeg/JPEGENC.h}
+  - {path: firmware-sdk/QCBOR/src/ieee754.h}
+  - {path: firmware-sdk/QCBOR/inc/qcbor.h}
+  - {path: firmware-sdk/QCBOR/inc/UsefulBuf.h}
+  - {path: firmware-sdk/sensor-aq/sensor_aq.cpp}
+  - {path: firmware-sdk/sensor-aq/sensor_aq_none.cpp}
   - {path: firmware-sdk/at_base64_lib.h}
   - {path: firmware-sdk/ei_camera_interface.h}
   - {path: firmware-sdk/ei_config_types.h}
@@ -89,10 +93,7 @@ include:
   file_list:
   - {path: jpegdec/jpegdec.h}
   - {path: jpegdec/picojpeg.h}
-  - {path: QCBOR/inc/qcbor.h}
-  - {path: QCBOR/inc/UsefulBuf.h}
   - {path: sensor_aq_mbedtls/sensor_aq_mbedtls_hs256.h}
-- {path: src/libs/QCBOR/inc}
 sdk: {id: gecko_sdk, version: 4.0.2}
 toolchain_settings:
 - {value: -Wno-unused-parameter, option: gcc_compiler_option}
@@ -125,8 +126,6 @@ component:
 - {id: mic_driver}
 - {id: veml6035_driver}
 - {from: edge_impulse_extension, id: edge_impulse_model}
-define:
-- {name: EI_SENSOR_AQ_STREAM, value: FILE}
 configuration:
 - {name: SL_DEVICE_INIT_HFRCO_BAND, value: cmuHFRCODPLLFreq_80M0Hz}
 - {name: SL_STACK_SIZE, value: '8192'}

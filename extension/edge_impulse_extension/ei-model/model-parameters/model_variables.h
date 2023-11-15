@@ -138,13 +138,13 @@ const ei_impulse_t impulse_36_3 = {
     .frequency = 62.5,
     .dsp_blocks_size = ei_dsp_blocks_size,
     .dsp_blocks = ei_dsp_blocks,
-    
+
     .object_detection = 0,
     .object_detection_count = 0,
     .object_detection_threshold = 0,
     .object_detection_last_layer = EI_CLASSIFIER_LAST_LAYER_UNKNOWN,
     .fomo_output_size = 0,
-    
+
     .tflite_output_features_count = 4,
     .learning_blocks_size = ei_learning_blocks_size,
     .learning_blocks = ei_learning_blocks,
