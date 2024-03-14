@@ -52,7 +52,7 @@
 #define EI_CLASSIFIER_DATATYPE_UINT8             3
 #define EI_CLASSIFIER_DATATYPE_INT8              9
 
-#define EI_CLASSIFIER_PROJECT_ID                 52
+#define EI_CLASSIFIER_PROJECT_ID                 93
 #define EI_CLASSIFIER_PROJECT_OWNER              "Edge Impulse Profiling"
 #define EI_CLASSIFIER_PROJECT_NAME               "Demo: Continuous motion recognition"
 #define EI_CLASSIFIER_PROJECT_DEPLOY_VERSION     1
@@ -113,6 +113,10 @@
 #endif // EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW
 #define EI_CLASSIFIER_SLICE_SIZE                 (EI_CLASSIFIER_RAW_SAMPLE_COUNT / EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW)
 
+#define EI_STUDIO_VERSION_MAJOR             1
+#define EI_STUDIO_VERSION_MINOR             39
+#define EI_STUDIO_VERSION_PATCH             5
+
 
 #if ((EI_CLASSIFIER_INFERENCING_ENGINE == EI_CLASSIFIER_TFLITE) ||      (EI_CLASSIFIER_INFERENCING_ENGINE == EI_CLASSIFIER_DRPAI)) &&      EI_CLASSIFIER_USE_FULL_TFLITE == 1
 
@@ -141,6 +145,7 @@ typedef struct {
     bool stdev;
     bool skewness;
     bool kurtosis;
+    int moving_avg_num_windows;
 } ei_dsp_config_flatten_t;
 
 typedef struct {
