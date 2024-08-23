@@ -6,3 +6,5 @@ gecko_sdk_*/
 *.emProject
 *.project.mak
 *.pintool
+create-arduino-library.sh
+
