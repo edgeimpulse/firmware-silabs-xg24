@@ -199,7 +199,7 @@ void ei_run_impulse(void)
     }
     ei_free(snapshot_buf);
 
-    display_results(&result);
+    display_results(&ei_default_impulse, &result);
     send_results_over_ble(&result);
 
     if (debug_mode) {
