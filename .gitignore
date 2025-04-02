@@ -7,4 +7,6 @@ gecko_sdk_*/
 *.project.mak
 *.pintool
 create-arduino-library.sh
-
+.metadata/
+vscode.conf
+.projectlinkstore
