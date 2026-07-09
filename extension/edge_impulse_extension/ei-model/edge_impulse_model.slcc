@@ -148,6 +148,7 @@ include:
       - path: edge-impulse-sdk/classifier/postprocessing/alignment/rectangular_lsap.hpp
       - path: edge-impulse-sdk/classifier/postprocessing/ei_object_counting.h
       - path: edge-impulse-sdk/classifier/postprocessing/ei_object_tracking.h
+      - path: edge-impulse-sdk/classifier/postprocessing/ei_object_tracking_sort.h
       - path: edge-impulse-sdk/classifier/postprocessing/ei_performance_calibration.h
       - path: edge-impulse-sdk/classifier/postprocessing/ei_postprocessing.h
       - path: edge-impulse-sdk/classifier/postprocessing/ei_postprocessing_ai_hub.h
