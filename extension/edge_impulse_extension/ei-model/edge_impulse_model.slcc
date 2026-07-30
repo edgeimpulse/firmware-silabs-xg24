@@ -135,6 +135,7 @@ include:
       - path: edge-impulse-sdk/classifier/inferencing_engines/ethos_linux.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/memryx.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/nordic_axon.h
+      - path: edge-impulse-sdk/classifier/inferencing_engines/onnx_qaic.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/onnx_tidl.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tensaiflow.h
       - path: edge-impulse-sdk/classifier/inferencing_engines/tensorrt.h
