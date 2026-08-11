@@ -220,11 +220,11 @@ include:
       - path: edge-impulse-sdk/porting/ethos-core-driver/include/ethosu_driver.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/include/ethosu_types.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/include/pmu_ethosu.h
-      - path: edge-impulse-sdk/porting/ethos-core-driver/src/ehtosu_config_u65.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu55_interface.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu65_interface.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu85_interface.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_config_u55.h
+      - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_config_u65.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_config_u85.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_device.h
       - path: edge-impulse-sdk/porting/ethos-core-driver/src/ethosu_interface.h
